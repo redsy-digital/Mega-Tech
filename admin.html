@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Painel Administrativo - Mega Tech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>Painel Administrativo Mega Tech</h1>
+</header>
+
+<div id="loginContainer" class="admin-container" style="display:block;">
+    <h2>Login</h2>
+
+    <div class="input-group">
+        <label>Nome de utilizador</label>
+        <input id="loginUser">
+    </div>
+
+    <div class="input-group">
+        <label>Senha</label>
+        <input type="password" id="loginPass">
+    </div>
+
+    <button onclick="fazerLogin()">Entrar</button>
+
+    <br><br>
+    <button id="epe" onclick="mostrarAlteracoes()" style="background:#444;">Alterar credenciais de acesso</button>
+</div>
+
+<!-- ALTERAR CREDENCIAIS -->
+<div id="alterarContainer" class="admin-container" style="display:none;">
+    <h2>Alterar Credenciais</h2>
+
+    <button onclick="mostrarAlterarUser()">Alterar nome de utilizador</button>
+    <br><br>
+    <button onclick="mostrarAlterarPass()">Alterar palavra-passe</button>
+
+    <br><br>
+    <button id="ep" onclick="voltarLogin()">Voltar ao Login</button>
+</div>
+
+<!-- ALTERAR USERNAME -->
+<div id="alterarUser" class="admin-container" style="display:none;">
+    <h2>Alterar Nome de Utilizador</h2>
+
+    <div class="input-group">
+        <label>Nome de utilizador atual</label>
+        <input id="oldUser">
+    </div>
+
+    <div class="input-group">
+        <label>Novo nome de utilizador</label>
+        <input id="newUser">
+    </div>
+
+    <div class="input-group">
+        <label>Confirmar novo nome de utilizador</label>
+        <input id="newUser2">
+    </div>
+
+    <button onclick="salvarNovoUser()">Salvar</button>
+    <br><br>
+    <button onclick="mostrarAlteracoes()">Voltar</button>
+</div>
+
+<!-- ALTERAR PASSWORD -->
+<div id="alterarPass" class="admin-container" style="display:none;">
+    <h2>Alterar Palavra-passe</h2>
+
+    <div class="input-group">
+        <label>Senha atual</label>
+        <input type="password" id="oldPass">
+    </div>
+
+    <div class="input-group">
+        <label>Nova senha</label>
+        <input type="password" id="newPass">
+    </div>
+
+    <div class="input-group">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="newPass2">
+    </div>
+
+    <button onclick="salvarNovaPass()">Salvar</button>
+    <br><br>
+    <button onclick="mostrarAlteracoes()">Voltar</button>
+</div>
+
+
+
+<!-- PAINEL ADMINISTRATIVO ORIGINAL -->
+<div id="adminReal" class="admin-container" style="display:none;">
+
+    <div class="div">
+        <h2>Adicionar Produto</h2>
+        <a href="index.html">Ver loja</a>
+    </div>
+
+    <div class="input-group">
+        <label>Nome do Produto</label>
+        <input id="nome">
+    </div>
+
+    <div class="input-group">
+        <label>Preço</label>
+        <input id="preco">
+    </div>
+
+    <div class="input-group">
+        <label>Descrição</label>
+        <textarea id="descricao"></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Carregar foto do produto</label>
+        <input type="file" id="imagemUpload" accept="image/*">
+    </div>
+    <div>
+        <button onclick="adicionarProduto()">Adicionar Produtos</button>
+    </div>
+
+    <h2>Produtos Cadastrados</h2>
+    <div id="produtosAdmin"></div>
+
+    <br>
+    <button onclick="logout()" style="background:#a00;">Sair do Painel</button>
+
+</div>
+
+<footer>
+    © Dev. - REDSY Digital Services
+    <p>Contacte o desenvolvedor</p>
+    contact.redsy.digital@gmail.com
+    WhatsApp: +244 956 998 587
+</footer>
+
+<script>
+/* ================================
+   SISTEMA DE LOGIN
+   ================================ */
+
+if (!localStorage.getItem("admUser")) {
+    localStorage.setItem("admUser", "admin");
+}
+if (!localStorage.getItem("admPass")) {
+    localStorage.setItem("admPass", "1234");
+}
+
+function fazerLogin() {
+    const u = document.getElementById("loginUser").value;
+    const p = document.getElementById("loginPass").value;
+
+    if (u === localStorage.getItem("admUser") && p === localStorage.getItem("admPass")) {
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("adminReal").style.display = "block";
+        carregarAdmin();
+    } else {
+        alert("Credenciais incorretas!");
+    }
+}
+
+function mostrarAlteracoes() {
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("alterarContainer").style.display = "block";
+}
+
+function mostrarAlterarUser() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarUser").style.display = "block";
+}
+
+function mostrarAlterarPass() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarPass").style.display = "block";
+}
+
+function voltarLogin() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarUser").style.display = "none";
+    document.getElementById("alterarPass").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+}
+
+function salvarNovoUser() {
+    const old = document.getElementById("oldUser").value;
+    const n1 = document.getElementById("newUser").value;
+    const n2 = document.getElementById("newUser2").value;
+
+    if (old !== localStorage.getItem("admUser")) return alert("Nome atual incorreto!");
+    if (n1 !== n2) return alert("Os nomes não coincidem!");
+
+    localStorage.setItem("admUser", n1);
+    alert("Nome de utilizador alterado!");
+    voltarLogin();
+}
+
+function salvarNovaPass() {
+    const old = document.getElementById("oldPass").value;
+    const p1 = document.getElementById("newPass").value;
+    const p2 = document.getElementById("newPass2").value;
+
+    if (old !== localStorage.getItem("admPass")) return alert("Senha atual incorreta!");
+    if (p1 !== p2) return alert("As senhas não coincidem!");
+
+    localStorage.setItem("admPass", p1);
+    alert("Senha alterada!");
+    voltarLogin();
+}
+
+function logout() {
+    location.reload();
+}
+
+
+
+/* ========================================
+   SISTEMA ORIGINAL DE PRODUTOS
+   ======================================== */
+
+function adicionarProduto() {
+    const nome = document.getElementById("nome").value;
+    const preco = document.getElementById("preco").value;
+    const descricao = document.getElementById("descricao").value;
+
+    const imagemInput = document.getElementById("imagemUpload");
+    const file = imagemInput.files[0];
+
+    if (!file) return alert("Selecione uma imagem!");
+
+    const reader = new FileReader();
+    reader.onloadend = function () {
+        const imagemBase64 = reader.result;
+
+        const produto = { nome, preco, descricao, imagem: imagemBase64 };
+        const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
+        lista.push(produto);
+        localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
+
+        alert("Produto adicionado!");
+        carregarAdmin();
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function carregarAdmin() {
+    const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
+    const div = document.getElementById("produtosAdmin");
+    div.innerHTML = "";
+
+    lista.forEach((p, i) => {
+        div.innerHTML += `
+            <div class="produto-admin-card">
+                <h3>${p.nome}</h3>
+                <p><b>Preço:</b> ${p.preco}</p>
+                <button onclick="remover(${i})">Remover</button>
+            </div>
+        `;
+    });
+}
+
+function remover(i) {
+    const lista = JSON.parse(localStorage.getItem("produtosMegaTech"));
+    lista.splice(i, 1);
+    localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
+    carregarAdmin();
+}
+</script>
+
+</body>
+</html>

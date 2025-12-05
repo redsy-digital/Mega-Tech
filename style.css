@@ -1,0 +1,205 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #f3f7ff;
+    color: #1a1a1a;
+}
+
+/* HEADER */
+header {
+    background: #0b2d66;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+.logo {
+    border-radius:10px;
+}
+div#pri {
+    display:block;
+    padding:10px;
+}
+div#pri > p{
+    text-indent:10px;
+    font-size:12.5px;
+}
+header img {
+    height: 70px;
+}
+
+header h1 {
+    font-size: 28px;
+    margin-left: 10px;
+}
+
+/* HERO */
+.hero {
+    background: linear-gradient(to right, #0b2d66, #1976d2);
+    padding: 40px;
+    color: white;
+    text-align: center;
+}
+
+.hero p {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+/* PRODUTOS */
+.produtos {
+    padding: 25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.produto-card {
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+
+.produto-card:hover {
+    transform: translateY(-4px);
+}
+
+.produto-card img {
+    width: 100%;
+    border-radius: 6px;
+}
+
+.produto-info {
+    margin-top: 10px;
+}
+.div > a {
+    display: flex;
+    width: 100px;
+    margin-left: 35%;
+    height:50px;
+    background: #0b2d66;
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    text-decoration:none;
+}
+.div {
+    display: flex;
+}
+.btn-whatsapp {
+    display: block;
+    margin-top: 10px;
+    background: #25d366;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* BOTÃO WHATSAAP FLUTUANTE */
+.whatsapp-flutuante {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #25d366;
+    padding:9px;
+    border-radius:50%;
+    z-index: 999;
+}
+
+.whatsapp-flutuante img {
+    width: 40px;
+}
+
+/* ADMIN */
+.admin-container {
+    padding: 20px;
+}
+
+.admin-container h2 {
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+button#ep {
+    margin-top:200px;
+}
+button#epe {
+    margin-bottom: 150px;
+}
+.admin-container {
+    padding:10px;
+}
+
+button {
+    background: #0b2d66;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.produto-admin-card {
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+.rede {
+    width:400px;
+    height:100px;
+    border-radius:10px;
+    box-shadow:2px 2px 8px #000000B5;
+    background: white;
+}
+
+.fb {
+    background:#0b2d66;
+    box-shadow:2px 2px 8px #000000B5;
+    width:100px;
+    height:50px;
+    padding:10px;
+    color:white;
+    font-size:30px;
+    margin-top:50px;
+    
+}
+
+footer a {
+    color:blue;
+}
+
+footer {
+    padding:50px;
+    text-align: left;
+    background: skyblue;
+    height:170px;
+    color:white;
+    margin:0px;
+    
+}
