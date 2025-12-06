@@ -2,132 +2,334 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Painel Administrativo - Mega Tech</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<!-- Todo o teu HTML de login e alterar credenciais continua igual (não mexi no visual) -->
-<header><h1>Painel Administrativo Mega Tech</h1></header>
+<header>
+    <h1>Painel Administrativo Mega Tech</h1>
+</header>
 
 <div id="loginContainer" class="admin-container" style="display:block;">
     <h2>Login</h2>
-    <div class="input-group"><label>Usuário</label><input id="loginUser"></div>
-    <div class="input-group"><label>Senha</label><input type="password" id="loginPass"></div>
+
+    <div class="input-group">
+        <label>Nome de utilizador</label>
+        <input id="loginUser">
+    </div>
+
+    <div class="input-group">
+        <label>Senha</label>
+        <input type="password" id="loginPass">
+    </div>
+
     <button onclick="fazerLogin()">Entrar</button>
+
     <br><br>
-    <button id="epe" onclick="mostrarAlteracoes()" style="background:#444;">Alterar credenciais</button>
+    <button id="epe" onclick="mostrarAlteracoes()" style="background:#444;">Alterar credenciais de acesso</button>
 </div>
 
-<!-- ALTERAR CREDENCIAIS (mesmo visual) -->
 <div id="alterarContainer" class="admin-container" style="display:none;">
     <h2>Alterar Credenciais</h2>
-    <button onclick="mostrarAlterarUser()">Alterar usuário</button><br><br>
-    <button onclick="mostrarAlterarPass()">Alterar senha</button><br><br>
-    <button onclick="voltarLogin()">Voltar ao Login</button>
+
+    <button onclick="mostrarAlterarUser()">Alterar nome de utilizador</button>
+    <br><br>
+    <button onclick="mostrarAlterarPass()">Alterar palavra-passe</button>
+
+    <br><br>
+    <button id="ep" onclick="voltarLogin()">Voltar ao Login</button>
 </div>
 
 <div id="alterarUser" class="admin-container" style="display:none;">
-    <h2>Novo Usuário</h2>
-    <input placeholder="Usuário atual" id="oldUser"><br><br>
-    <input placeholder="Novo usuário" id="newUser"><br><br>
-    <input placeholder="Confirmar novo" id="newUser2"><br><br>
-    <button onclick="salvarNovoUser()">Salvar</button><br><br>
+    <h2>Alterar Nome de Utilizador</h2>
+
+    <div class="input-group">
+        <label>Nome de utilizador atual</label>
+        <input id="oldUser">
+    </div>
+
+    <div class="input-group">
+        <label>Novo nome de utilizador</label>
+        <input id="newUser">
+    </div>
+
+    <div class="input-group">
+        <label>Confirmar novo nome de utilizador</label>
+        <input id="newUser2">
+    </div>
+
+    <button onclick="salvarNovoUser()">Salvar</button>
+    <br><br>
     <button onclick="mostrarAlteracoes()">Voltar</button>
 </div>
 
 <div id="alterarPass" class="admin-container" style="display:none;">
-    <h2>Nova Senha</h2>
-    <input type="password" placeholder="Senha atual" id="oldPass"><br><br>
-    <input type="password" placeholder="Nova senha" id="newPass"><br><br>
-    <input type="password" placeholder="Confirmar nova" id="newPass2"><br><br>
-    <button onclick="salvarNovaPass()">Salvar</button><br><br>
+    <h2>Alterar Palavra-passe</h2>
+
+    <div class="input-group">
+        <label>Senha atual</label>
+        <input type="password" id="oldPass">
+    </div>
+
+    <div class="input-group">
+        <label>Nova senha</label>
+        <input type="password" id="newPass">
+    </div>
+
+    <div class="input-group">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="newPass2">
+    </div>
+
+    <button onclick="salvarNovaPass()">Salvar</button>
+    <br><br>
     <button onclick="mostrarAlteracoes()">Voltar</button>
 </div>
 
-<!-- PAINEL DE PRODUTOS (igual ao anterior) -->
-<div id="adminReal" class="admin-container" style="display:none;">
-    <div class="div"><h2>Adicionar Produto</h2><a href="index.html" target="_blank">Ver loja</a></div>
-    <div class="input-group"><label>Nome</label><input id="nome"></div>
-    <div class="input-group"><label>Preço</label><input id="preco"></div>
-    <div class="input-group"><label>Descrição (opcional)</label><textarea id="descricao"></textarea></div>
-    <div class="input-group"><label>Foto</label><input type="file" id="imagemUpload" accept="image/*"></div>
-    <button onclick="adicionarProduto()">Adicionar Produto</button>
 
-    <h2 style="margin-top:40px;">Produtos no site</h2>
+
+<div id="adminReal" class="admin-container" style="display:none;">
+
+    <div class="div">
+        <h2>Adicionar Produto</h2>
+        <a href="index.html">Ver loja</a>
+    </div>
+
+    <div class="input-group">
+        <label>Nome do Produto</label>
+        <input id="nome">
+    </div>
+
+    <div class="input-group">
+        <label>Preço</label>
+        <input id="preco">
+    </div>
+
+    <div class="input-group">
+        <label>Descrição</label>
+        <textarea id="descricao"></textarea>
+    </div>
+
+    <div class="input-group">
+        <label>Carregar foto do produto</label>
+        <input type="file" id="imagemUpload" accept="image/*">
+    </div>
+    <div>
+        <button onclick="adicionarProduto()">Adicionar Produtos</button>
+    </div>
+
+    <h2>Produtos Cadastrados</h2>
     <div id="produtosAdmin"></div>
 
-    <br><br>
-    <button onclick="logout()" style="background:#a00;">Sair</button>
+    <br>
+    <button onclick="logout()" style="background:#a00;">Sair do Painel</button>
+
 </div>
 
+<footer>
+    © Dev. - REDSY Digital Services
+    <p>Contacte o desenvolvedor</p>
+    contact.redsy.digital@gmail.com
+    WhatsApp: +244 956 998 587
+</footer>
+
 <script>
-    // TUAS CHAVES DO SUPABASE
-    const supabaseUrl = 'https://tizkxplysjadtlrziomg.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+// --- CONFIGURAÇÃO DO SUPABASE ---
+const SUPABASE_URL = 'https://tizkxplysjadtlrziomg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
+const BUCKET_NAME = 'produtos'; // << CORRIGIDO PARA 'produtos'
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ---------------------------------
 
-    // LOGIN COM SUPABASE
-    async function fazerLogin() {
-        const user = document.getElementById("loginUser").value;
-        const pass = document.getElementById("loginPass").value;
+/* ================================
+   SISTEMA DE LOGIN (SEM ALTERAÇÕES)
+   ================================ */
 
-        const { data, error } = await supabase
-            .from('admin_credentials')            .select('*')            .limit(1)            .single();
+if (!localStorage.getItem("admUser")) {
+    localStorage.setItem("admUser", "admin");
+}
+if (!localStorage.getItem("admPass")) {
+    localStorage.setItem("admPass", "1234");
+}
 
-        if (error || !data) return alert("Erro no login");
+function fazerLogin() {
+    const u = document.getElementById("loginUser").value;
+    const p = document.getElementById("loginPass").value;
 
-        if (user === data.username && pass === data.password) {
-            document.getElementById("loginContainer").style.display = "none";
-            document.getElementById("adminReal").style.display = "block";
-            carregarAdmin();
-        } else {
-            alert("Usuário ou senha incorretos!");
-        }
+    if (u === localStorage.getItem("admUser") && p === localStorage.getItem("admPass")) {
+        document.getElementById("loginContainer").style.display = "none";
+        document.getElementById("adminReal").style.display = "block";
+        carregarAdmin();
+    } else {
+        alert("Credenciais incorretas!");
+    }
+}
+
+function mostrarAlteracoes() {
+    document.getElementById("loginContainer").style.display = "none";
+    document.getElementById("alterarContainer").style.display = "block";
+}
+
+function mostrarAlterarUser() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarUser").style.display = "block";
+}
+
+function mostrarAlterarPass() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarPass").style.display = "block";
+}
+
+function voltarLogin() {
+    document.getElementById("alterarContainer").style.display = "none";
+    document.getElementById("alterarUser").style.display = "none";
+    document.getElementById("alterarPass").style.display = "none";
+    document.getElementById("loginContainer").style.display = "block";
+}
+
+function salvarNovoUser() {
+    const old = document.getElementById("oldUser").value;
+    const n1 = document.getElementById("newUser").value;
+    const n2 = document.getElementById("newUser2").value;
+
+    if (old !== localStorage.getItem("admUser")) return alert("Nome atual incorreto!");
+    if (n1 !== n2) return alert("Os nomes não coincidem!");
+
+    localStorage.setItem("admUser", n1);
+    alert("Nome de utilizador alterado!");
+    voltarLogin();
+}
+
+function salvarNovaPass() {
+    const old = document.getElementById("oldPass").value;
+    const p1 = document.getElementById("newPass").value;
+    const p2 = document.getElementById("newPass2").value;
+
+    if (old !== localStorage.getItem("admPass")) return alert("Senha atual incorreta!");
+    if (p1 !== p2) return alert("As senhas não coincidem!");
+
+    localStorage.setItem("admPass", p1);
+    alert("Senha alterada!");
+    voltarLogin();
+}
+
+function logout() {
+    location.reload();
+}
+
+
+
+/* ========================================
+   SISTEMA DE PRODUTOS (COM SUPABASE)
+   ======================================== */
+
+/**
+ * Adiciona um produto, fazendo upload da imagem para o Supabase Storage
+ * e inserindo os dados na tabela 'produtos'.
+ */
+async function adicionarProduto() {
+    const nome = document.getElementById("nome").value;
+    const preco = document.getElementById("preco").value;
+    const descricao = document.getElementById("descricao").value;
+
+    const imagemInput = document.getElementById("imagemUpload");
+    const file = imagemInput.files[0];
+
+    if (!file) return alert("Selecione uma imagem!");
+    if (!nome || !preco || !descricao) return alert("Preencha todos os campos!");
+
+    // 1. Upload da imagem para o Supabase Storage (no bucket 'produtos')
+    const fileExtension = file.name.split('.').pop();
+    // Gera um nome de arquivo único para evitar colisões
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExtension}`; 
+    const storagePath = `${fileName}`; // Armazena diretamente na raiz do bucket 'produtos'
+
+    const { error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME) 
+        .upload(storagePath, file);
+
+    if (uploadError) {
+        console.error('Erro no upload da imagem:', uploadError);
+        alert("Erro ao carregar a imagem! Verifique a permissão de INSERT no Storage.");
+        return;
+    }
+    
+    // 2. Inserir o produto na tabela 'produtos'. A coluna 'imagem' guarda o nome do arquivo.
+    const { error: insertError } = await supabase
+        .from('produtos')
+        .insert([
+            { nome, preco, descricao, imagem: fileName }
+        ]);
+
+    if (insertError) {
+        console.error('Erro ao adicionar produto:', insertError);
+        alert("Erro ao adicionar produto! Verifique as permissões RLS da tabela.");
+    } else {
+        alert("Produto adicionado com sucesso!");
+        carregarAdmin();
+        // Limpar os campos
+        document.getElementById("nome").value = '';
+        document.getElementById("preco").value = '';
+        document.getElementById("descricao").value = '';
+        document.getElementById("imagemUpload").value = '';
+    }
+}
+
+/**
+ * Carrega e exibe a lista de produtos cadastrados no painel.
+ */
+async function carregarAdmin() {
+    // 1. Buscando dados da tabela 'produtos'
+    const { data: produtos, error } = await supabase
+        .from('produtos')
+        .select('*')
+        .order('id', { ascending: false }); // Ordena para ver os mais recentes
+
+    if (error) {
+        console.error("Erro ao carregar produtos do admin:", error);
+        return;
     }
 
-    // ALTERAR USUÁRIO
-    async function salvarNovoUser() {
-        const old = document.getElementById("oldUser").value;
-        const n1 = document.getElementById("newUser").value;
-        const n2 = document.getElementById("newUser2").value;
+    const div = document.getElementById("produtosAdmin");
+    div.innerHTML = "";
 
-        const { data } = await supabase.from('admin_credentials').select('*').limit(1).single();
+    // 2. Usando os dados do Supabase para renderizar
+    produtos.forEach(p => {
+        // Agora usamos p.id, que vem do Supabase, para a remoção
+        div.innerHTML += `
+            <div class="produto-admin-card">
+                <h3>${p.nome}</h3>
+                <p><b>ID:</b> ${p.id} | <b>Preço:</b> ${p.preco}</p>
+                <button onclick="remover('${p.id}')">Remover</button>
+            </div>
+        `;
+    });
+}
 
-        if (old !== data.username) return alert("Usuário atual errado!");
-        if (n1 !== n2) return alert("Os usuários não coincidem!");
+/**
+ * Remove um produto do Supabase pelo ID.
+ */
+async function remover(id) {
+    if (!confirm("Tem certeza que deseja remover este produto?")) return;
 
-        await supabase.from('admin_credentials').update({ username: n1 });
-        alert("Usuário alterado!");
-        voltarLogin();
+    // 1. Deletar o produto do banco de dados (pelo ID)
+    const { error } = await supabase
+        .from('produtos')
+        .delete()
+        .eq('id', id); // 'eq' significa igual a
+
+    if (error) {
+        console.error("Erro ao remover produto:", error);
+        alert("Erro ao remover produto!");
+    } else {
+        alert("Produto removido!");
+        carregarAdmin();
     }
-
-    // ALTERAR SENHA
-    async function salvarNovaPass() {
-        const old = document.getElementById("oldPass").value;
-        const p1 = document.getElementById("newPass").value;
-        const p2 = document.getElementById("newPass2").value;
-
-        const { data } = await supabase.from('admin_credentials').select('*').limit(1).single();
-
-        if (old !== data.password) return alert("Senha atual errada!");
-        if (p1 !== p2) return alert("As senhas não coincidem!");
-
-        await supabase.from('admin_credentials').update({ password: p1 });
-        alert("Senha alterada com sucesso!");
-        voltarLogin();
-    }
-
-    // AS FUNÇÕES DE PRODUTOS CONTINUAM EXATAMENTE AS MESMAS DO CÓDIGO ANTERIOR
-    async function adicionarProduto() { /* ← código igual ao anterior */ }
-    async function carregarAdmin() { /* código igual ao anterior */ }
-    async function remover(id) { /* código igual ao anterior */ }
-
-    // Copia aqui as 3 funções de produto do meu último admin.html (adicionarProduto, carregarAdmin, remover)
-    // (são as mesmas que te dei antes, não mudei nada nelas)
-
+}
 </script>
+
 </body>
 </html>

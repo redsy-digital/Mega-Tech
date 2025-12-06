@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+      <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Mega Tech - Web Shop</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -21,59 +21,70 @@
 
 <section class="hero">
     <h2>Nosso objetivo é levar tecnologia de qualidade a preços justos, ajudando você a ter mais desempenho, praticidade e conectividade.</h2>
-    <p>Localização: Lubango - Bairro Comercial, por detrás do Comando Provincial dos Bombeiros</p>
+    <p>Localização: Lubango - Bairro Comercial, por deatrás do Comando Provincial dos Bombeiros</p>
 </section>
 
 <section class="produtos" id="listaProdutos">
-    <p style="text-align:center; padding:50px;">Carregando produtos...</p>
-</section>
-
+    </section>
 <a class="whatsapp-flutuante" href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20vi%20um%20dos%20seus%20produtos%20no%20vosso%20site%20e%20estou%20interessado,%20pode%20me%20dar%20mais%20informações?" target="_blank">
+    
     <img src="logow.png">
 </a>
-
 <footer>
     <div>
         <p>© 2025 Mega Tech - Comércio e Prestação de Serviços - Lubango</p>
-        Suporte: filipeoliveira191117@gmail.com | WhatsApp: +244 924 811 382
-        <p><a href="https://www.facebook.com/profile.php?id=100081510871668">Facebook</a></p>
-    </div>
+Suporte: filipeoliveira191117@gmail.com | WhatsApp: +244 924 811 382<p><a href="https://www.facebook.com/profile.php?id=100081510871668">Facebook</a></p>
+</div>
 </footer>
-
 <script>
-    const supabaseUrl = 'https://tizkxplysjadtlrziomg.supabase.co';
-    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+// --- CONFIGURAÇÃO DO SUPABASE ---
+const SUPABASE_URL = 'https://tizkxplysjadtlrziomg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
+const BUCKET_NAME = 'produtos'; // << CORRIGIDO PARA 'produtos'
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ---------------------------------
 
-    async function carregarProdutos() {
-        const { data, error } = await supabase.from('produtos').select('*').order('created_at', { ascending: false });
+/**
+ * Funções de Carregamento de Produtos (usando Supabase)
+ */
+async function carregarProdutos() {
+    // 1. Buscando dados da tabela 'produtos' no Supabase
+    const { data: produtos, error } = await supabase
+        .from('produtos')
+        .select('*');
 
-        const div = document.getElementById("listaProdutos");
-        div.innerHTML = "";
-
-        if (error || !data || data.length === 0) {
-            div.innerHTML = "<p style='text-align:center;padding:80px;font-size:18px;'>Ainda sem produtos... O administrador vai adicionar em breve!</p>";
-            return;
-        }
-
-        data.forEach(p => {
-            div.innerHTML += `
-                <div class="produto-card">
-                    <img src="\( {p.imagem}" alt=" \){p.nome}">
-                    <div class="produto-info">
-                        <h3>${p.nome}</h3>
-                        <p><b>Preço:</b> ${p.preco}</p>
-                        <p>${p.descricao || ''}</p>
-                        <a class="btn-whatsapp" 
-                           href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20estou%20interessado%20no%20\( {encodeURIComponent(p.nome)}%20por%20 \){p.preco}"
-                           target="_blank">Contactar no WhatsApp</a>
-                    </div>
-                </div>
-            `;
-        });
+    if (error) {
+        console.error("Erro ao carregar produtos:", error);
+        document.getElementById("listaProdutos").innerHTML = "<p style='text-align:center;'>Não foi possível carregar os produtos. Verifique a configuração RLS da sua tabela 'produtos'.</p>";
+        return;
     }
 
-    carregarProdutos();
+    const div = document.getElementById("listaProdutos");
+    div.innerHTML = "";
+
+    // 2. Usando os dados do Supabase para renderizar
+    produtos.forEach(p => {
+        // Constrói a URL completa para a imagem do Supabase Storage
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${p.imagem}`;
+
+        div.innerHTML += `
+            <div class="produto-card">
+                <img src="${imageUrl}">
+                <div class="produto-info">
+                    <h3>${p.nome}</h3>
+                    <p><b>Preço:</b> ${p.preco}</p>
+                    <p>${p.descricao}</p>
+                    <a class="btn-whatsapp" 
+                       href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20estou%20interessado%20no%20produto:%20${encodeURIComponent(p.nome)}"
+                       target="_blank">Contactar no WhatsApp</a>
+                </div>
+            </div>
+        `;
+    });
+}
+
+carregarProdutos();
 </script>
+
 </body>
 </html>
