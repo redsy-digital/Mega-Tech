@@ -5,7 +5,6 @@
       <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Mega Tech - Web Shop</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -25,7 +24,9 @@
 </section>
 
 <section class="produtos" id="listaProdutos">
-    </section>
+    <!-- Os produtos vão aparecer automaticamente aqui -->
+</section>
+<!-- BOTÃO FLUTUANTE -->
 <a class="whatsapp-flutuante" href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20vi%20um%20dos%20seus%20produtos%20no%20vosso%20site%20e%20estou%20interessado,%20pode%20me%20dar%20mais%20informações?" target="_blank">
     
     <img src="logow.png">
@@ -37,39 +38,15 @@ Suporte: filipeoliveira191117@gmail.com | WhatsApp: +244 924 811 382<p><a href="
 </div>
 </footer>
 <script>
-// --- CONFIGURAÇÃO DO SUPABASE ---
-const SUPABASE_URL = 'https://tizkxplysjadtlrziomg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
-const BUCKET_NAME = 'produtos'; // << CORRIGIDO PARA 'produtos'
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ---------------------------------
-
-/**
- * Funções de Carregamento de Produtos (usando Supabase)
- */
-async function carregarProdutos() {
-    // 1. Buscando dados da tabela 'produtos' no Supabase
-    const { data: produtos, error } = await supabase
-        .from('produtos')
-        .select('*');
-
-    if (error) {
-        console.error("Erro ao carregar produtos:", error);
-        document.getElementById("listaProdutos").innerHTML = "<p style='text-align:center;'>Não foi possível carregar os produtos. Verifique a configuração RLS da sua tabela 'produtos'.</p>";
-        return;
-    }
-
+function carregarProdutos() {
+    const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
     const div = document.getElementById("listaProdutos");
     div.innerHTML = "";
 
-    // 2. Usando os dados do Supabase para renderizar
-    produtos.forEach(p => {
-        // Constrói a URL completa para a imagem do Supabase Storage
-        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${p.imagem}`;
-
+    lista.forEach(p => {
         div.innerHTML += `
             <div class="produto-card">
-                <img src="${imageUrl}">
+                <img src="${p.imagem}">
                 <div class="produto-info">
                     <h3>${p.nome}</h3>
                     <p><b>Preço:</b> ${p.preco}</p>

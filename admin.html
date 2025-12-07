@@ -5,7 +5,6 @@
       <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Painel Administrativo - Mega Tech</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -32,6 +31,7 @@
     <button id="epe" onclick="mostrarAlteracoes()" style="background:#444;">Alterar credenciais de acesso</button>
 </div>
 
+<!-- ALTERAR CREDENCIAIS -->
 <div id="alterarContainer" class="admin-container" style="display:none;">
     <h2>Alterar Credenciais</h2>
 
@@ -43,6 +43,7 @@
     <button id="ep" onclick="voltarLogin()">Voltar ao Login</button>
 </div>
 
+<!-- ALTERAR USERNAME -->
 <div id="alterarUser" class="admin-container" style="display:none;">
     <h2>Alterar Nome de Utilizador</h2>
 
@@ -66,6 +67,7 @@
     <button onclick="mostrarAlteracoes()">Voltar</button>
 </div>
 
+<!-- ALTERAR PASSWORD -->
 <div id="alterarPass" class="admin-container" style="display:none;">
     <h2>Alterar Palavra-passe</h2>
 
@@ -91,6 +93,7 @@
 
 
 
+<!-- PAINEL ADMINISTRATIVO ORIGINAL -->
 <div id="adminReal" class="admin-container" style="display:none;">
 
     <div class="div">
@@ -137,15 +140,8 @@
 </footer>
 
 <script>
-// --- CONFIGURAÇÃO DO SUPABASE ---
-const SUPABASE_URL = 'https://tizkxplysjadtlrziomg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpemt4cGx5c2phZHRscnppb21nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMDgyNTIsImV4cCI6MjA4MDU4NDI1Mn0.XyLjvbLV7FR0GEpc28XPQJQVSrZnbWhsAUVpjMI4OW4';
-const BUCKET_NAME = 'produtos'; // << CORRIGIDO PARA 'produtos'
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// ---------------------------------
-
 /* ================================
-   SISTEMA DE LOGIN (SEM ALTERAÇÕES)
+   SISTEMA DE LOGIN
    ================================ */
 
 if (!localStorage.getItem("admUser")) {
@@ -223,14 +219,10 @@ function logout() {
 
 
 /* ========================================
-   SISTEMA DE PRODUTOS (COM SUPABASE)
+   SISTEMA ORIGINAL DE PRODUTOS
    ======================================== */
 
-/**
- * Adiciona um produto, fazendo upload da imagem para o Supabase Storage
- * e inserindo os dados na tabela 'produtos'.
- */
-async function adicionarProduto() {
+function adicionarProduto() {
     const nome = document.getElementById("nome").value;
     const preco = document.getElementById("preco").value;
     const descricao = document.getElementById("descricao").value;
@@ -239,95 +231,44 @@ async function adicionarProduto() {
     const file = imagemInput.files[0];
 
     if (!file) return alert("Selecione uma imagem!");
-    if (!nome || !preco || !descricao) return alert("Preencha todos os campos!");
 
-    // 1. Upload da imagem para o Supabase Storage (no bucket 'produtos')
-    const fileExtension = file.name.split('.').pop();
-    // Gera um nome de arquivo único para evitar colisões
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExtension}`; 
-    const storagePath = `${fileName}`; // Armazena diretamente na raiz do bucket 'produtos'
+    const reader = new FileReader();
+    reader.onloadend = function () {
+        const imagemBase64 = reader.result;
 
-    const { error: uploadError } = await supabase.storage
-        .from(BUCKET_NAME) 
-        .upload(storagePath, file);
+        const produto = { nome, preco, descricao, imagem: imagemBase64 };
+        const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
+        lista.push(produto);
+        localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
 
-    if (uploadError) {
-        console.error('Erro no upload da imagem:', uploadError);
-        alert("Erro ao carregar a imagem! Verifique a permissão de INSERT no Storage.");
-        return;
-    }
-    
-    // 2. Inserir o produto na tabela 'produtos'. A coluna 'imagem' guarda o nome do arquivo.
-    const { error: insertError } = await supabase
-        .from('produtos')
-        .insert([
-            { nome, preco, descricao, imagem: fileName }
-        ]);
-
-    if (insertError) {
-        console.error('Erro ao adicionar produto:', insertError);
-        alert("Erro ao adicionar produto! Verifique as permissões RLS da tabela.");
-    } else {
-        alert("Produto adicionado com sucesso!");
+        alert("Produto adicionado!");
         carregarAdmin();
-        // Limpar os campos
-        document.getElementById("nome").value = '';
-        document.getElementById("preco").value = '';
-        document.getElementById("descricao").value = '';
-        document.getElementById("imagemUpload").value = '';
-    }
+    };
+
+    reader.readAsDataURL(file);
 }
 
-/**
- * Carrega e exibe a lista de produtos cadastrados no painel.
- */
-async function carregarAdmin() {
-    // 1. Buscando dados da tabela 'produtos'
-    const { data: produtos, error } = await supabase
-        .from('produtos')
-        .select('*')
-        .order('id', { ascending: false }); // Ordena para ver os mais recentes
-
-    if (error) {
-        console.error("Erro ao carregar produtos do admin:", error);
-        return;
-    }
-
+function carregarAdmin() {
+    const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
     const div = document.getElementById("produtosAdmin");
     div.innerHTML = "";
 
-    // 2. Usando os dados do Supabase para renderizar
-    produtos.forEach(p => {
-        // Agora usamos p.id, que vem do Supabase, para a remoção
+    lista.forEach((p, i) => {
         div.innerHTML += `
             <div class="produto-admin-card">
                 <h3>${p.nome}</h3>
-                <p><b>ID:</b> ${p.id} | <b>Preço:</b> ${p.preco}</p>
-                <button onclick="remover('${p.id}')">Remover</button>
+                <p><b>Preço:</b> ${p.preco}</p>
+                <button onclick="remover(${i})">Remover</button>
             </div>
         `;
     });
 }
 
-/**
- * Remove um produto do Supabase pelo ID.
- */
-async function remover(id) {
-    if (!confirm("Tem certeza que deseja remover este produto?")) return;
-
-    // 1. Deletar o produto do banco de dados (pelo ID)
-    const { error } = await supabase
-        .from('produtos')
-        .delete()
-        .eq('id', id); // 'eq' significa igual a
-
-    if (error) {
-        console.error("Erro ao remover produto:", error);
-        alert("Erro ao remover produto!");
-    } else {
-        alert("Produto removido!");
-        carregarAdmin();
-    }
+function remover(i) {
+    const lista = JSON.parse(localStorage.getItem("produtosMegaTech"));
+    lista.splice(i, 1);
+    localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
+    carregarAdmin();
 }
 </script>
 
