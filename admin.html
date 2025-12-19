@@ -2,275 +2,113 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Painel Administrativo - Mega Tech</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Mega Tech</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<header>
-    <h1>Painel Administrativo Mega Tech</h1>
-</header>
-
-<div id="loginContainer" class="admin-container" style="display:block;">
-    <h2>Login</h2>
-
-    <div class="input-group">
-        <label>Nome de utilizador</label>
-        <input id="loginUser">
-    </div>
-
-    <div class="input-group">
-        <label>Senha</label>
-        <input type="password" id="loginPass">
-    </div>
-
-    <button onclick="fazerLogin()">Entrar</button>
-
-    <br><br>
-    <button id="epe" onclick="mostrarAlteracoes()" style="background:#444;">Alterar credenciais de acesso</button>
-</div>
-
-<!-- ALTERAR CREDENCIAIS -->
-<div id="alterarContainer" class="admin-container" style="display:none;">
-    <h2>Alterar Credenciais</h2>
-
-    <button onclick="mostrarAlterarUser()">Alterar nome de utilizador</button>
-    <br><br>
-    <button onclick="mostrarAlterarPass()">Alterar palavra-passe</button>
-
-    <br><br>
-    <button id="ep" onclick="voltarLogin()">Voltar ao Login</button>
-</div>
-
-<!-- ALTERAR USERNAME -->
-<div id="alterarUser" class="admin-container" style="display:none;">
-    <h2>Alterar Nome de Utilizador</h2>
-
-    <div class="input-group">
-        <label>Nome de utilizador atual</label>
-        <input id="oldUser">
-    </div>
-
-    <div class="input-group">
-        <label>Novo nome de utilizador</label>
-        <input id="newUser">
-    </div>
-
-    <div class="input-group">
-        <label>Confirmar novo nome de utilizador</label>
-        <input id="newUser2">
-    </div>
-
-    <button onclick="salvarNovoUser()">Salvar</button>
-    <br><br>
-    <button onclick="mostrarAlteracoes()">Voltar</button>
-</div>
-
-<!-- ALTERAR PASSWORD -->
-<div id="alterarPass" class="admin-container" style="display:none;">
-    <h2>Alterar Palavra-passe</h2>
-
-    <div class="input-group">
-        <label>Senha atual</label>
-        <input type="password" id="oldPass">
-    </div>
-
-    <div class="input-group">
-        <label>Nova senha</label>
-        <input type="password" id="newPass">
-    </div>
-
-    <div class="input-group">
-        <label>Confirmar nova senha</label>
-        <input type="password" id="newPass2">
-    </div>
-
-    <button onclick="salvarNovaPass()">Salvar</button>
-    <br><br>
-    <button onclick="mostrarAlteracoes()">Voltar</button>
-</div>
-
-
-
-<!-- PAINEL ADMINISTRATIVO ORIGINAL -->
-<div id="adminReal" class="admin-container" style="display:none;">
-
-    <div class="div">
-        <h2>Adicionar Produto</h2>
-        <a href="index.html">Ver loja</a>
-    </div>
-
-    <div class="input-group">
-        <label>Nome do Produto</label>
-        <input id="nome">
-    </div>
-
-    <div class="input-group">
-        <label>Preço</label>
-        <input id="preco">
-    </div>
-
-    <div class="input-group">
-        <label>Descrição</label>
-        <textarea id="descricao"></textarea>
-    </div>
-
-    <div class="input-group">
-        <label>Carregar foto do produto</label>
-        <input type="file" id="imagemUpload" accept="image/*">
-    </div>
-    <div>
-        <button onclick="adicionarProduto()">Adicionar Produtos</button>
-    </div>
-
-    <h2>Produtos Cadastrados</h2>
-    <div id="produtosAdmin"></div>
-
-    <br>
-    <button onclick="logout()" style="background:#a00;">Sair do Painel</button>
-
-</div>
-
-<footer>
-    © Dev. - REDSY Digital Services
-    <p>Contacte o desenvolvedor</p>
-    contact.redsy.digital@gmail.com
-    WhatsApp: +244 956 998 587
-</footer>
-
-<script>
-/* ================================
-   SISTEMA DE LOGIN
-   ================================ */
-
-if (!localStorage.getItem("admUser")) {
-    localStorage.setItem("admUser", "admin");
-}
-if (!localStorage.getItem("admPass")) {
-    localStorage.setItem("admPass", "1234");
-}
-
-function fazerLogin() {
-    const u = document.getElementById("loginUser").value;
-    const p = document.getElementById("loginPass").value;
-
-    if (u === localStorage.getItem("admUser") && p === localStorage.getItem("admPass")) {
-        document.getElementById("loginContainer").style.display = "none";
-        document.getElementById("adminReal").style.display = "block";
-        carregarAdmin();
-    } else {
-        alert("Credenciais incorretas!");
-    }
-}
-
-function mostrarAlteracoes() {
-    document.getElementById("loginContainer").style.display = "none";
-    document.getElementById("alterarContainer").style.display = "block";
-}
-
-function mostrarAlterarUser() {
-    document.getElementById("alterarContainer").style.display = "none";
-    document.getElementById("alterarUser").style.display = "block";
-}
-
-function mostrarAlterarPass() {
-    document.getElementById("alterarContainer").style.display = "none";
-    document.getElementById("alterarPass").style.display = "block";
-}
-
-function voltarLogin() {
-    document.getElementById("alterarContainer").style.display = "none";
-    document.getElementById("alterarUser").style.display = "none";
-    document.getElementById("alterarPass").style.display = "none";
-    document.getElementById("loginContainer").style.display = "block";
-}
-
-function salvarNovoUser() {
-    const old = document.getElementById("oldUser").value;
-    const n1 = document.getElementById("newUser").value;
-    const n2 = document.getElementById("newUser2").value;
-
-    if (old !== localStorage.getItem("admUser")) return alert("Nome atual incorreto!");
-    if (n1 !== n2) return alert("Os nomes não coincidem!");
-
-    localStorage.setItem("admUser", n1);
-    alert("Nome de utilizador alterado!");
-    voltarLogin();
-}
-
-function salvarNovaPass() {
-    const old = document.getElementById("oldPass").value;
-    const p1 = document.getElementById("newPass").value;
-    const p2 = document.getElementById("newPass2").value;
-
-    if (old !== localStorage.getItem("admPass")) return alert("Senha atual incorreta!");
-    if (p1 !== p2) return alert("As senhas não coincidem!");
-
-    localStorage.setItem("admPass", p1);
-    alert("Senha alterada!");
-    voltarLogin();
-}
-
-function logout() {
-    location.reload();
-}
-
-
-
-/* ========================================
-   SISTEMA ORIGINAL DE PRODUTOS
-   ======================================== */
-
-function adicionarProduto() {
-    const nome = document.getElementById("nome").value;
-    const preco = document.getElementById("preco").value;
-    const descricao = document.getElementById("descricao").value;
-
-    const imagemInput = document.getElementById("imagemUpload");
-    const file = imagemInput.files[0];
-
-    if (!file) return alert("Selecione uma imagem!");
-
-    const reader = new FileReader();
-    reader.onloadend = function () {
-        const imagemBase64 = reader.result;
-
-        const produto = { nome, preco, descricao, imagem: imagemBase64 };
-        const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
-        lista.push(produto);
-        localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
-
-        alert("Produto adicionado!");
-        carregarAdmin();
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function carregarAdmin() {
-    const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
-    const div = document.getElementById("produtosAdmin");
-    div.innerHTML = "";
-
-    lista.forEach((p, i) => {
-        div.innerHTML += `
-            <div class="produto-admin-card">
-                <h3>${p.nome}</h3>
-                <p><b>Preço:</b> ${p.preco}</p>
-                <button onclick="remover(${i})">Remover</button>
+    <header class="admin-header">
+        <div class="container" style="text-align: left;">
+            <div class="logo-section">
+                
+                <div class="logo-text">
+                    <h1>PAINEL ADMINISTRATIVO</h1>
+                    <p class="tagline">Gestão de Produtos e Inventário</p>
+                </div>
             </div>
-        `;
-    });
-}
+            <a href="index.html" style="color: var(--accent-color); margin-top: 10px; display: inline-block;"><i class="fas fa-home"></i> Ver Loja</a>
+        </div>
+    </header>
 
-function remover(i) {
-    const lista = JSON.parse(localStorage.getItem("produtosMegaTech"));
-    lista.splice(i, 1);
-    localStorage.setItem("produtosMegaTech", JSON.stringify(lista));
-    carregarAdmin();
-}
-</script>
+    <div class="container" id="login-section" style="max-width: 400px; margin-top: 50px;">
+        <div class="admin-form-section">
+            <h2><i class="fas fa-lock"></i> Acesso Administrativo</h2>
+            <form id="loginForm">
+                <label for="usernameLogin">Nome de Utilizador</label>
+                <input type="text" id="usernameLogin" required>
 
+                <label for="passwordLogin">Palavra-passe</label>
+                <input type="password" id="passwordLogin" required>
+
+                <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <p id="loginMessage" style="color: red; margin-top: 10px;"></p>
+                <a href="change_credentials.html" style="margin-top: 15px; display: block; text-align: center;">
+                    <i class="fas fa-cog"></i> Alterar Credenciais
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <main class="container admin-panel" id="admin-content" style="display: none;">
+
+        <section class="admin-form-section" style="flex: 1;">
+            <h2><i class="fas fa-plus-circle"></i> Adicionar/Editar Produto</h2>
+            <form id="productForm">
+                <input type="hidden" id="productId">
+
+                <label for="productName">Nome do Produto *</label>
+                <input type="text" id="productName" required>
+
+                <label for="productPrice">Preço do Produto (AOA) *</label>
+                <input type="number" id="productPrice" min="0" step="1" required>
+
+                <label for="productDescription">Descrição do Produto (Inclua RAM, ROM, Rede, Versão, etc.) *</label>
+                <textarea id="productDescription" rows="5" required></textarea>
+                <small>Ex: O Samsung Galaxy A54 tem RAM/ROM: 8GB/128GB, Rede: 5G, Versão: Android 13. Câmera de 50MP, bateria de 5000mAh.</small>
+                
+                <label for="productCategory">Categoria *</label>
+                <select id="productCategory" required>
+                    <option value="">Selecione a Categoria</option>
+                    <option value="smartphone">Smartphone</option>
+                    <option value="notebook">Notebook</option>
+                    <option value="tablet">Tablet</option>
+                    <option value="accessory">Acessório</option>
+                </select>
+
+                <label for="productDiscount">Desconto (%)</label>
+                <input type="number" id="productDiscount" min="0" max="100" value="0">
+                <small>Defina 0 se não houver desconto.</small>
+
+                <hr style="margin: 20px 0;">
+                
+                <h3><i class="fas fa-image"></i> Imagem do Produto</h3>
+                
+                <label for="imageUpload">Carregar do Dispositivo:</label>
+                <input type="file" id="imageUpload" accept="image/*">
+                
+                <p style="text-align: center; margin: 10px 0;">- OU -</p>
+
+                <label for="imageURL">Link de Imagem (URL):</label>
+                <input type="text" id="imageURL" placeholder="Ex: https://linkdaimagem.com/foto.jpg">
+
+                <img id="imagePreviewAdmin" src="" alt="Pré-visualização da Imagem" style="display: none;">
+
+                <button type="submit" id="submitButton"><i class="fas fa-save"></i> Adicionar Produto</button>
+            </form>
+        </section>
+
+        <section class="product-list-section">
+            <h2><i class="fas fa-list"></i> Produtos Publicados</h2>
+            <ul id="productListAdmin">
+                </ul>
+                
+                <br>
+
+                <div style="width: 100%; text-align: center; margin-top: 30px;">
+                <button onclick="logoutAdmin()" style="background-color: #dc3545; padding: 10px 40px;"><i class="fas fa-sign-out-alt"></i> Terminar Sessão</button>
+                </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Mega Tech - Painel Admin.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>

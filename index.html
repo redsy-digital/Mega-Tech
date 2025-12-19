@@ -2,66 +2,84 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Mega Tech - Web Shop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mega Tech - Tecnologia de Qualidade a Preços Justos</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
-<header>
-    <div style="display:flex; align-items:center;">
-        <img class="logo" src="logo.png">
-        <div id="pri">
-            <h1>MEGA TECH</h1>
-            <p>Comércio e prestação de serviços</p>
-        </div>
-    </div>
-</header>
-
-<section class="hero">
-    <h2>Nosso objetivo é levar tecnologia de qualidade a preços justos, ajudando você a ter mais desempenho, praticidade e conectividade.</h2>
-    <p>Localização: Lubango - Bairro Comercial, por deatrás do Comando Provincial dos Bombeiros</p>
-</section>
-
-<section class="produtos" id="listaProdutos">
-    <!-- Os produtos vão aparecer automaticamente aqui -->
-</section>
-<!-- BOTÃO FLUTUANTE -->
-<a class="whatsapp-flutuante" href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20vi%20um%20dos%20seus%20produtos%20no%20vosso%20site%20e%20estou%20interessado,%20pode%20me%20dar%20mais%20informações?" target="_blank">
-    
-    <img src="logow.png">
-</a>
-<footer>
-    <div>
-        <p>© 2025 Mega Tech - Comércio e Prestação de Serviços - Lubango</p>
-Suporte: filipeoliveira191117@gmail.com | WhatsApp: +244 924 811 382<p><a href="https://www.facebook.com/profile.php?id=100081510871668">Página no Facebook</a></p>
-</div>
-</footer>
-<script>
-function carregarProdutos() {
-    const lista = JSON.parse(localStorage.getItem("produtosMegaTech") || "[]");
-    const div = document.getElementById("listaProdutos");
-    div.innerHTML = "";
-
-    lista.forEach(p => {
-        div.innerHTML += `
-            <div class="produto-card">
-                <img src="${p.imagem}">
-                <div class="produto-info">
-                    <h3>${p.nome}</h3>
-                    <p><b>Preço:</b> ${p.preco}</p>
-                    <p>${p.descricao}</p>
-                    <a class="btn-whatsapp" 
-                       href="https://wa.me/244924811382?text=Olá%20Mega%20Tech,%20vi%20este%20produto%20no%20vosso%20site,%20e%20fiqeui%20interessado%20${encodeURIComponent(p.nome)}"
-                       target="_blank">Comprar pelo WhatsApp</a>
+    <header>
+        <div class="container">
+            <div id="ap">
+                <section id="logo">
+                    
+                    <div class="logo-section">
+                    <img id="logo" src="logo.jpg" alt="Logotipo Mega Tech">
+                    <div class="logo-text">
+                </section>
+                <section id="h1">
+                        
+                    <h1>MEGA TECH</h1>
+                    <p class="tagline">COMÉRCIO E PRESTAÇÃO DE SERVIÇOS</p>
+                    
+                 </section>
+                </div>
                 </div>
             </div>
-        `;
-    });
-}
+            <div class="header-info-content">
+                <p>"Nosso objetivo é levar tecnologia de qualidade a preços justos, ajudando você a ter mais desempenho praticidade e conectividade."</p>
+            </div>
+        </div>
+    </header>
 
-carregarProdutos();
-</script>
+    <main class="container">
+        
+        <section class="filters">
+            <h2>Nossos Produtos</h2>
+            <button class="filter-btn active" data-category="all">Todos</button>
+            <button class="filter-btn" data-category="smartphone">Smartphones</button>
+            <button class="filter-btn" data-category="notebook">Notebooks</button>
+            <button class="filter-btn" data-category="tablet">Tablets</button>
+            <button class="filter-btn" data-category="accessory">Acessórios</button>
+        </section>
 
+        <section class="search-bar">
+            <div style="margin: 20px auto; max-width: 600px;">
+                <input type="text" id="search-input" placeholder="Pesquisar produtos por nome, marca, RAM, 5G, Android..." style="width: 100%; padding: 12px; border: 2px solid var(--primary-color); border-radius: 5px; font-size: 1em;">
+            </div>
+        </section>
+
+        <section id="product-grid">
+            </section>
+
+        <section class="store-info">
+            <h2>📍 Onde Nos Encontrar</h2>
+            <p>Estamos localizados no **Lubango - bairro Comercial**, por detrás do comando provincial dos bombeiros.</p>
+            <p>Segunda a Sábado: 8h30 - 17h30</p>
+            <div class="contact-info">
+                <a href="https://wa.me/244924811382" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp: +244924811382</a>
+                <a href="mailto:filipeoliveira191117@gmail.com"><i class="fas fa-envelope"></i> E-mail: filipeoliveira191117@gmail.com</a>
+            </div>
+        </section>
+
+    </main>
+
+    <a href="https://wa.me/244924811382?text=Ol%C3%A1%20Mega%20Tech,%20vi%20um%20dos%20seus%20produtos%20no%20vosso%20site%20e%20estou%20interessado,%20pode%20me%20dar%20mais%20informa%C3%A7%C3%B5es%3F" class="floating-whatsapp" target="_blank" title="Fale Conosco no WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Mega Tech. Todos os direitos reservados.</p>
+            <p>Desenvolvido com ❤️ por REDSY Digital Services</p>
+            <p>
+                <a href="#">Termos de Uso</a> |
+                <a href="#">Política de Privacidade</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
