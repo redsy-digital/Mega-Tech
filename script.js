@@ -1,71 +1,80 @@
-// script.js
+// script.js - Versão atualizada para usar API RESTful (Node.js/Knex)
 
 // Variável global para o WhatsApp da loja
 const WHATSAPP_NUMBER = "244924811382";
 const STORE_NAME = "Mega Tech";
+const API_BASE_URL = 
 
 // --- Credenciais e Autenticação ---
 
-// Credenciais Padrão (Usadas apenas se o localStorage estiver vazio)
-const DEFAULT_USERNAME = "adminmegatech";
-const DEFAULT_PASSWORD = "123";
-function alterap() {
-    const p = document.getElementById("cp").value;
-    DEFAULT_PASSWORD = p.value;
-}
 /**
- * Carrega as credenciais atuais do localStorage ou usa as padrão.
+ * Carrega as credenciais atuais do servidor.
  * @returns {object} {username, password}
  */
-function loadCredentials() {
-    const storedUsername = localStorage.getItem('megaTechAdminUsername');
-    const storedPassword = localStorage.getItem('megaTechAdminPassword');
-    
-    // Se não existir, salva as padrão para garantir que existam
-    if (!storedUsername || !storedPassword) {
-        saveCredentials(DEFAULT_USERNAME, DEFAULT_PASSWORD);
-        return { username: DEFAULT_USERNAME, password: DEFAULT_PASSWORD };
+async function fetchCredentials() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/credentials`);
+        if (!response.ok) {
+            throw new Error(
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(
+        // Retorna credenciais padrão em caso de falha de comunicação
+        return { username: "adminmegatech", password: "123" };
     }
-
-    return {
-        username: storedUsername,
-        password: storedPassword
-    };
 }
 
 /**
- * Salva as novas credenciais no localStorage.
+ * Salva as novas credenciais no servidor.
  * @param {string} username
  * @param {string} password
  */
-function saveCredentials(username, password) {
-    localStorage.setItem('megaTechAdminUsername', username);
-    localStorage.setItem('megaTechAdminPassword', password);
+async function updateCredentials(username, password) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/credentials`, {
+            method: 
+            headers: {
+                
+            },
+            body: JSON.stringify({ username, password })
+        });
+        if (!response.ok) {
+            throw new Error(
+        }
+        return true;
+    } catch (error) {
+        console.error(
+        return false;
+    }
 }
 
 // Lógica de Login/Logout
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
 
-    const usernameInput = document.getElementById('usernameLogin').value;
-    const passwordInput = document.getElementById('passwordLogin').value;
-    const loginMessage = document.getElementById('loginMessage');
-    const { username: correctUsername, password: correctPassword } = loadCredentials();
+    const usernameInput = document.getElementById(
+    const passwordInput = document.getElementById(
+    const loginMessage = document.getElementById(
+    
+    // 1. Busca as credenciais corretas no servidor
+    const { username: correctUsername, password: correctPassword } = await fetchCredentials();
 
     if (usernameInput === correctUsername && passwordInput === correctPassword) {
-        localStorage.setItem('megaTechIsLoggedIn', 'true');
-        loginMessage.textContent = 'Login bem-sucedido!';
-        loginMessage.style.color = 'green';
+        // 2. Armazena o estado de login na sessionStorage (não persiste após fechar o browser)
+        sessionStorage.setItem(
+        loginMessage.textContent = 
+        loginMessage.style.color = 
         setTimeout(initAdminPageContent, 500);
     } else {
-        loginMessage.textContent = 'Nome de Utilizador ou Palavra-passe incorretos.';
-        loginMessage.style.color = 'red';
+        loginMessage.textContent = 
+        loginMessage.style.color = 
     }
 }
 
 function logoutAdmin() {
-    if (confirm("Tem certeza que deseja terminar a sessão?")) {
-        localStorage.removeItem('megaTechIsLoggedIn');
+    if (confirm(
+        sessionStorage.removeItem(
         window.location.reload(); 
     }
 }
@@ -73,52 +82,64 @@ function logoutAdmin() {
 
 // Lógica de Alteração de Credenciais (usadas em change_credentials.html)
 
-function handleChangePassword(event) {
+async function handleChangePassword(event) {
     event.preventDefault();
-    const currentPass = document.getElementById('currentPassword').value;
-    const newPass = document.getElementById('newPassword').value;
-    const confirmNewPass = document.getElementById('confirmNewPassword').value;
-    const passwordMessage = document.getElementById('passwordMessage');
-    const { username, password: actualPassword } = loadCredentials();
+    const currentPass = document.getElementById(
+    const newPass = document.getElementById(
+    const confirmNewPass = document.getElementById(
+    const passwordMessage = document.getElementById(
     
-    passwordMessage.style.color = 'red';
-    passwordMessage.textContent = '';
+    const { username, password: actualPassword } = await fetchCredentials();
+    
+    passwordMessage.style.color = 
+    passwordMessage.textContent = 
     
     if (currentPass !== actualPassword) {
-        passwordMessage.textContent = 'A Palavra-passe Atual está incorreta.';
+        passwordMessage.textContent = 
     } else if (newPass !== confirmNewPass) {
-        passwordMessage.textContent = 'A Nova Palavra-passe e a Confirmação não coincidem.';
+        passwordMessage.textContent = 
     } else if (newPass.length < 5) {
-        passwordMessage.textContent = 'A Nova Palavra-passe deve ter no mínimo 5 caracteres.';
+        passwordMessage.textContent = 
     } else {
-        saveCredentials(username, newPass);
-        passwordMessage.textContent = 'Palavra-passe alterada com sucesso! Você será redirecionado em breve.';
-        passwordMessage.style.color = 'green';
-        document.getElementById('changePasswordForm').reset();
-        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
+        const success = await updateCredentials(username, newPass);
+        if (success) {
+            passwordMessage.textContent = 
+            passwordMessage.style.color = 
+            document.getElementById(
+            sessionStorage.removeItem(
+            setTimeout(() => window.location.href = 
+        } else {
+            passwordMessage.textContent = 
+        }
     }
 }
 
-function handleChangeUsername(event) {
+async function handleChangeUsername(event) {
     event.preventDefault();
-    const currentUsername = document.getElementById('currentUsername').value;
-    const newUsername = document.getElementById('newUsername').value;
-    const usernameMessage = document.getElementById('usernameMessage');
-    const { username: actualUsername, password } = loadCredentials();
+    const currentUsername = document.getElementById(
+    const newUsername = document.getElementById(
+    const usernameMessage = document.getElementById(
+    
+    const { username: actualUsername, password } = await fetchCredentials();
 
-    usernameMessage.style.color = 'red';
-    usernameMessage.textContent = '';
+    usernameMessage.style.color = 
+    usernameMessage.textContent = 
 
     if (currentUsername !== actualUsername) {
-        usernameMessage.textContent = 'O Nome de Utilizador Atual está incorreto.';
+        usernameMessage.textContent = 
     } else if (newUsername.length < 3) {
-        usernameMessage.textContent = 'O Novo Nome de Utilizador deve ter no mínimo 3 caracteres.';
+        usernameMessage.textContent = 
     } else {
-        saveCredentials(newUsername, password);
-        usernameMessage.textContent = 'Nome de Utilizador alterado com sucesso! Você será redirecionado em breve.';
-        usernameMessage.style.color = 'green';
-        document.getElementById('changeUsernameForm').reset();
-        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
+        const success = await updateCredentials(newUsername, password);
+        if (success) {
+            usernameMessage.textContent = 
+            usernameMessage.style.color = 
+            document.getElementById(
+            sessionStorage.removeItem(
+            setTimeout(() => window.location.href = 
+        } else {
+            usernameMessage.textContent = 
+        }
     }
 }
 
@@ -126,27 +147,37 @@ function handleChangeUsername(event) {
 // --- Funções de Ajuda ---
 
 function formatCurrency(value) {
-    if (typeof value !== 'number' || isNaN(value)) {
+    if (typeof value !== 
         return "AOA 0";
     }
-    return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA', minimumFractionDigits: 0 }).format(value);
+    return new Intl.NumberFormat(
 }
 
-// --- Lógica de Persistência (localStorage) ---
+// --- Lógica de Persistência (API) ---
 
-function loadProducts() {
-    const productsJson = localStorage.getItem('megaTechProducts');
-    return productsJson ? JSON.parse(productsJson) : [];
+/**
+ * Carrega a lista de produtos do servidor.
+ * @returns {Array<object>} Lista de produtos.
+ */
+async function fetchProducts() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products`);
+        if (!response.ok) {
+            throw new Error(
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(
+        return [];
+    }
 }
 
-function saveProducts(products) {
-    localStorage.setItem('megaTechProducts', JSON.stringify(products));
-}
+// A função saveProducts não é mais necessária, pois as operações são feitas via API.
 
 // --- Lógica do Catálogo (index.html) ---
 
 /**
- * Gera o HTML para um único cartão de produto.
+ * Gera o HTML para um único cartão de produto. (Mantido)
  * @param {object} product - O objeto produto.
  * @returns {string} O HTML do cartão.
  */
@@ -154,15 +185,15 @@ function createProductCard(product) {
     const { id, name, price, description, category, discount, image } = product;
 
     const hasDiscount = discount > 0;
-    const originalPrice = price;
-    const currentPrice = hasDiscount ? price * (1 - discount / 100) : price;
+    const originalPrice = parseFloat(price);
+    const currentPrice = hasDiscount ? originalPrice * (1 - discount / 100) : originalPrice;
 
     // Extrai as especificações da descrição 
     const specsRegex = /(RAM\/ROM:.*?)(,|$)|(Rede:.*?)(,|$)|(Versão:.*?)(,|$)/gi;
     const specsMatches = description.match(specsRegex) || [];
     
     const specsList = specsMatches.map(spec => {
-        return spec.replace(/,$/, '').trim();
+        return spec.replace(/,$/, 
     }).filter(s => s.length > 0);
 
     const whatsappMessage = encodeURIComponent(`Olá ${STORE_NAME}, vi o ${name} no vosso site e fiquei interessado. (ID: ${id})`);
@@ -171,18 +202,18 @@ function createProductCard(product) {
     return `
         <div class="product-card" data-category="${category}" data-id="${id}">
             <div class="product-image-container">
-                ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : ''}
-                <img src="${image || 'placeholder.jpg'}" alt="${name}">
+                ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : 
+                <img src="${image || 
             </div>
             <div class="product-details">
                 <h3>${name}</h3>
                 <p style="white-space: pre-wrap; word-wrap: break-word;">${description}</p> <div class="price-section">
                     <span class="current-price">${formatCurrency(currentPrice)}</span>
-                    ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : ''}
+                    ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : 
                 </div>
                 <div class="specs">
-                    ${specsList.map(spec => `<p><strong>${spec.split(':')[0]}:</strong> ${spec.split(':')[1]}</p>`).join('')}
-                    ${specsList.length === 0 ? '<p>Ver descrição para especificações detalhadas.</p>' : ''}
+                    ${specsList.map(spec => `<p><strong>${spec.split(
+                    ${specsList.length === 0 ? 
                 </div>
                 <a href="${whatsappURL}" class="whatsapp-btn" target="_blank">
                     <i class="fab fa-whatsapp"></i> Tenho Interesse!
@@ -192,16 +223,16 @@ function createProductCard(product) {
     `;
 }
 
-function renderCatalog(category = 'all', searchTerm = '') {
-    const productGrid = document.getElementById('product-grid');
+async function renderCatalog(category = 
+    const productGrid = document.getElementById(
     if (!productGrid) return;
 
-    const products = loadProducts();
-    productGrid.innerHTML = ''; 
+    const products = await fetchProducts(); // Alterado para fetchProducts
+    productGrid.innerHTML = 
 
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
-    let filteredProducts = category === 'all'
+    let filteredProducts = category === 
         ? products
         : products.filter(p => p.category === category);
 
@@ -218,7 +249,7 @@ function renderCatalog(category = 'all', searchTerm = '') {
     }
 
     if (filteredProducts.length === 0) {
-        productGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">Nenhum produto encontrado com os filtros ou termo de pesquisa aplicados.</p>';
+        productGrid.innerHTML = 
         return;
     }
 
@@ -228,24 +259,24 @@ function renderCatalog(category = 'all', searchTerm = '') {
 }
 
 function initIndexPage() {
-    let currentCategory = 'all';
-    renderCatalog('all');
+    let currentCategory = 
+    renderCatalog(
 
-    const filterButtons = document.querySelectorAll('.filter-btn');
+    const filterButtons = document.querySelectorAll(
     filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            this.classList.add('active');
+        button.addEventListener(
+            filterButtons.forEach(btn => btn.classList.remove(
+            this.classList.add(
             
-            currentCategory = this.getAttribute('data-category');
-            const searchTerm = document.getElementById('search-input').value; 
+            currentCategory = this.getAttribute(
+            const searchTerm = document.getElementById(
             renderCatalog(currentCategory, searchTerm);
         });
     });
 
-    const searchInput = document.getElementById('search-input');
+    const searchInput = document.getElementById(
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener(
             renderCatalog(currentCategory, this.value);
         });
     }
@@ -255,78 +286,88 @@ function initIndexPage() {
 // --- Lógica do Painel de Admin (admin.html) ---
 
 function resetAdminForm() {
-    const form = document.getElementById('productForm');
-    const imagePreview = document.getElementById('imagePreviewAdmin');
-    const submitButton = document.getElementById('submitButton');
+    const form = document.getElementById(
+    const imagePreview = document.getElementById(
+    const submitButton = document.getElementById(
 
     form.reset();
-    document.getElementById('productId').value = '';
-    imagePreview.style.display = 'none';
-    imagePreview.src = '';
-    submitButton.innerHTML = '<i class="fas fa-save"></i> Adicionar Produto';
-    submitButton.style.backgroundColor = 'var(--primary-color)';
+    document.getElementById(
+    imagePreview.style.display = 
+    imagePreview.src = 
+    submitButton.innerHTML = 
+    submitButton.style.backgroundColor = 
 }
 
-function editProduct(id) {
-    const products = loadProducts();
+async function editProduct(id) {
+    const products = await fetchProducts(); // Alterado para fetchProducts
     const productToEdit = products.find(p => p.id === id);
     if (!productToEdit) return;
 
-    document.getElementById('productId').value = productToEdit.id;
-    document.getElementById('productName').value = productToEdit.name;
-    document.getElementById('productPrice').value = productToEdit.price;
-    document.getElementById('productDescription').value = productToEdit.description;
-    document.getElementById('productCategory').value = productToEdit.category;
-    document.getElementById('productDiscount').value = productToEdit.discount || 0;
+    document.getElementById(
+    document.getElementById(
+    document.getElementById(
+    document.getElementById(
+    document.getElementById(
+    document.getElementById(
     
-    const isURL = productToEdit.image && productToEdit.image.startsWith('http');
-    document.getElementById('imageURL').value = isURL ? productToEdit.image : '';
-    document.getElementById('imageUpload').value = ''; 
+    const isURL = productToEdit.image && productToEdit.image.startsWith(
+    document.getElementById(
+    document.getElementById(
 
-    const imagePreview = document.getElementById('imagePreviewAdmin');
-    imagePreview.src = productToEdit.image || '';
-    imagePreview.style.display = productToEdit.image ? 'block' : 'none';
+    const imagePreview = document.getElementById(
+    imagePreview.src = productToEdit.image || 
+    imagePreview.style.display = productToEdit.image ? 
 
-    const submitButton = document.getElementById('submitButton');
-    submitButton.innerHTML = '<i class="fas fa-edit"></i> Salvar Edição';
-    submitButton.style.backgroundColor = '#ffc107'; 
+    const submitButton = document.getElementById(
+    submitButton.innerHTML = 
+    submitButton.style.backgroundColor = 
     
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 
 }
 
-function deleteProduct(id) {
-    if (confirm("Tem certeza que deseja remover este produto?")) {
-        let products = loadProducts();
-        products = products.filter(p => p.id !== id);
-        saveProducts(products);
-        renderAdminList(); 
-        alert("Produto removido com sucesso!");
+async function deleteProduct(id) {
+    if (confirm(
+        try {
+            const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+                method: 
+            });
+
+            if (!response.ok) {
+                throw new Error(
+            }
+
+            await renderAdminList(); 
+            alert(
+        } catch (error) {
+            console.error(
+            alert(
+        }
     }
 }
 
 
-function renderAdminList() {
-    const productListAdmin = document.getElementById('productListAdmin');
+async function renderAdminList() {
+    const productListAdmin = document.getElementById(
     if (!productListAdmin) return;
 
-    const products = loadProducts();
-    productListAdmin.innerHTML = ''; 
+    const products = await fetchProducts(); // Alterado para fetchProducts
+    productListAdmin.innerHTML = 
 
     if (products.length === 0) {
-        productListAdmin.innerHTML = '<li>Nenhum produto publicado.</li>';
+        productListAdmin.innerHTML = 
         return;
     }
 
     products.forEach(product => {
-        const listItem = document.createElement('li');
+        const listItem = document.createElement(
         listItem.innerHTML = `
             <div class="product-info-admin">
-                <strong>${product.name}</strong> (${product.category}) - ${formatCurrency(product.price)}
-                ${product.discount > 0 ? `<span style="color: red; margin-left: 10px;">(${product.discount}% OFF)</span>` : ''}
+                <strong>${product.name}</strong> (${product.category}) - ${formatCurrency(parseFloat(product.price))}
+                ${product.discount > 0 ? `<span style="color: red; margin-left: 10px;">(${product.discount}% OFF)</span>` : 
             </div>
             <div class="product-actions-admin">
-                <button onclick="editProduct('${product.id}')"><i class="fas fa-pen"></i> Editar</button>
-                <button onclick="deleteProduct('${product.id}')" style="background-color: #dc3545;"><i class="fas fa-trash"></i> Remover</button>
+                <button onclick="editProduct(
+                <button onclick="deleteProduct(
             </div>
         `;
         productListAdmin.appendChild(listItem);
@@ -336,33 +377,35 @@ function renderAdminList() {
 async function handleProductSubmit(event) {
     event.preventDefault();
 
-    const id = document.getElementById('productId').value;
-    const name = document.getElementById('productName').value;
-    const price = parseFloat(document.getElementById('productPrice').value);
-    const description = document.getElementById('productDescription').value;
-    const category = document.getElementById('productCategory').value;
-    const discount = parseInt(document.getElementById('productDiscount').value) || 0;
-    const imageURL = document.getElementById('imageURL').value;
-    const imageFile = document.getElementById('imageUpload').files[0];
+    const id = document.getElementById(
+    const name = document.getElementById(
+    const price = parseFloat(document.getElementById(
+    const description = document.getElementById(
+    const category = document.getElementById(
+    const discount = parseInt(document.getElementById(
+    const imageURL = document.getElementById(
+    const imageFile = document.getElementById(
     
     let imageUrlToUse = imageURL;
 
     if (imageFile) {
+        // Leitura do arquivo para Base64 (mantido, pois o backend aceita)
         imageUrlToUse = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
             reader.readAsDataURL(imageFile);
         });
     } else if (!imageUrlToUse && id) {
-        const products = loadProducts();
+        // Se for edição e não alterou a imagem, mantém a existente
+        const products = await fetchProducts();
         const existingProduct = products.find(p => p.id === id);
-        imageUrlToUse = existingProduct ? existingProduct.image : '';
+        imageUrlToUse = existingProduct ? existingProduct.image : 
     } else if (!imageUrlToUse) {
-        alert("Por favor, forneça uma imagem via URL ou carregue um arquivo.");
+        alert(
         return;
     }
 
-    const newProduct = {
+    const productData = {
         id: id || Date.now().toString(),
         name,
         price,
@@ -372,48 +415,57 @@ async function handleProductSubmit(event) {
         image: imageUrlToUse,
     };
 
-    let products = loadProducts();
+    try {
+        const method = id ? 
+        const url = id ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
 
-    if (id) {
-        const index = products.findIndex(p => p.id === id);
-        if (index !== -1) {
-            products[index] = newProduct;
-            alert("Produto atualizado com sucesso!");
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                
+            },
+            body: JSON.stringify(productData)
+        });
+
+        if (!response.ok) {
+            throw new Error(
         }
-    } else {
-        products.push(newProduct);
-        alert("Novo produto adicionado com sucesso!");
-    }
 
-    saveProducts(products);
-    resetAdminForm();
-    renderAdminList();
+        const message = id ? "Produto atualizado com sucesso!" : "Novo produto adicionado com sucesso!";
+        alert(message);
+
+        resetAdminForm();
+        await renderAdminList();
+    } catch (error) {
+        console.error(
+        alert(
+    }
 }
 
 function previewImage(event) {
-    const imagePreview = document.getElementById('imagePreviewAdmin');
-    imagePreview.style.display = 'block';
+    const imagePreview = document.getElementById(
+    imagePreview.style.display = 
     
-    if (event.target.id === 'imageUpload' && event.target.files.length > 0) {
+    if (event.target.id === 
         const file = event.target.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
             imagePreview.src = e.target.result;
         };
         reader.readAsDataURL(file);
-        document.getElementById('imageURL').value = ''; 
+        document.getElementById(
     } 
-    else if (event.target.id === 'imageURL' && event.target.value) {
+    else if (event.target.id === 
         imagePreview.src = event.target.value;
-        document.getElementById('imageUpload').value = ''; 
+        document.getElementById(
         
         imagePreview.onerror = function() {
-            imagePreview.src = ''; 
-            imagePreview.style.display = 'none';
-            alert("O link da imagem não pôde ser carregado. Verifique o URL.");
+            imagePreview.src = 
+            imagePreview.style.display = 
+            alert(
         };
     } else {
-         imagePreview.style.display = 'none';
+         imagePreview.style.display = 
     }
 }
 
@@ -421,24 +473,25 @@ function previewImage(event) {
  * Inicializa o conteúdo do painel (visível após o login).
  */
 function initAdminPageContent() {
-    const isLoggedIn = localStorage.getItem('megaTechIsLoggedIn') === 'true';
-    const loginSection = document.getElementById('login-section');
-    const adminContent = document.getElementById('admin-content');
+    // 1. Verifica o estado de login na sessionStorage
+    const isLoggedIn = sessionStorage.getItem(
+    const loginSection = document.getElementById(
+    const adminContent = document.getElementById(
 
     if (isLoggedIn) {
-        loginSection.style.display = 'none';
-        adminContent.style.display = 'flex'; 
+        loginSection.style.display = 
+        adminContent.style.display = 
         
-        const form = document.getElementById('productForm');
+        const form = document.getElementById(
         if (form) {
-            form.addEventListener('submit', handleProductSubmit);
-            document.getElementById('imageUpload').addEventListener('change', previewImage);
-            document.getElementById('imageURL').addEventListener('input', previewImage);
+            form.addEventListener(
+            document.getElementById(
+            document.getElementById(
         }
         renderAdminList();
     } else {
-        loginSection.style.display = 'block';
-        adminContent.style.display = 'none';
+        loginSection.style.display = 
+        adminContent.style.display = 
     }
 }
 
@@ -447,9 +500,9 @@ function initAdminPageContent() {
  */
 function initAdminPage() {
     // Apenas liga o formulário de login no admin.html
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById(
     if (loginForm) {
-        loginForm.addEventListener('submit', handleLogin);
+        loginForm.addEventListener(
     }
     
     // Verifica o estado do login
@@ -460,30 +513,30 @@ function initAdminPage() {
  * Inicializa a lógica da página de alteração de credenciais (change_credentials.html).
  */
 function initChangeCredentialsPage() {
-    const passwordForm = document.getElementById('changePasswordForm');
-    const usernameForm = document.getElementById('changeUsernameForm');
+    const passwordForm = document.getElementById(
+    const usernameForm = document.getElementById(
 
     if (passwordForm) {
-        passwordForm.addEventListener('submit', handleChangePassword);
+        passwordForm.addEventListener(
     }
     if (usernameForm) {
-        usernameForm.addEventListener('submit', handleChangeUsername);
+        usernameForm.addEventListener(
     }
 }
 
 
 // --- Inicialização Principal ---
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadCredentials(); 
-
+document.addEventListener(
+    // Não é mais necessário chamar loadCredentials aqui, pois é chamado dentro das funções
+    
     const pathname = window.location.pathname;
 
-    if (document.getElementById('product-grid')) {
+    if (document.getElementById(
         initIndexPage();
-    } else if (pathname.includes('change_credentials.html')) {
+    } else if (pathname.includes(
         initChangeCredentialsPage();
-    } else if (document.getElementById('productListAdmin')) {
+    } else if (document.getElementById(
         initAdminPage();
     }
 });
