@@ -1,200 +1,173 @@
-// script.js - Versão atualizada para usar API RESTful (Node.js/Knex)
+// script.js
+
+// CONFIGURAÇÃO SUPABASE - Substitua pelos seus dados reais
+const SUPABASE_URL = 'https://qshrpnhdqoouxdbpayhd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzaHJwbmhkcW9vdXhkYnBheWhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY0ODgwODAsImV4cCI6MjA4MjA2NDA4MH0.N0OTLnlJvSqDj4jKR7NsMEsD5Ee-CJgDTr6ZR2pJLyA';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function chama() {
+    const menu = document.getElementById("menu");
+    if (menu.style.display == "block" ) {
+        menu.style.display = "none";
+    } else {
+        menu.style.display= "block";
+    }
+}
 
 // Variável global para o WhatsApp da loja
 const WHATSAPP_NUMBER = "244924811382";
 const STORE_NAME = "Mega Tech";
-const API_BASE_URL = 
 
-// --- Credenciais e Autenticação ---
+// --- Credenciais e Autenticação (Mantido em LocalStorage) ---
+const DEFAULT_USERNAME = "adminmegatech";
+const DEFAULT_PASSWORD = "123";
 
 /**
- * Carrega as credenciais atuais do servidor.
- * @returns {object} {username, password}
+ * Carrega as credenciais atuais do localStorage ou usa as padrão.
  */
-async function fetchCredentials() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/credentials`);
-        if (!response.ok) {
-            throw new Error(
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(
-        // Retorna credenciais padrão em caso de falha de comunicação
-        return { username: "adminmegatech", password: "123" };
+function loadCredentials() {
+    const storedUsername = localStorage.getItem('megaTechAdminUsername');
+    const storedPassword = localStorage.getItem('megaTechAdminPassword');
+    if (!storedUsername || !storedPassword) {
+        saveCredentials(DEFAULT_USERNAME, DEFAULT_PASSWORD);
+        return { username: DEFAULT_USERNAME, password: DEFAULT_PASSWORD };
     }
+    return { username: storedUsername, password: storedPassword };
 }
 
 /**
- * Salva as novas credenciais no servidor.
- * @param {string} username
- * @param {string} password
+ * Salva as novas credenciais no localStorage.
  */
-async function updateCredentials(username, password) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/credentials`, {
-            method: 
-            headers: {
-                
-            },
-            body: JSON.stringify({ username, password })
-        });
-        if (!response.ok) {
-            throw new Error(
-        }
-        return true;
-    } catch (error) {
-        console.error(
-        return false;
-    }
+function saveCredentials(username, password) {
+    localStorage.setItem('megaTechAdminUsername', username);
+    localStorage.setItem('megaTechAdminPassword', password);
 }
 
 // Lógica de Login/Logout
-async function handleLogin(event) {
+function handleLogin(event) {
     event.preventDefault();
-
-    const usernameInput = document.getElementById(
-    const passwordInput = document.getElementById(
-    const loginMessage = document.getElementById(
-    
-    // 1. Busca as credenciais corretas no servidor
-    const { username: correctUsername, password: correctPassword } = await fetchCredentials();
+    const usernameInput = document.getElementById('usernameLogin').value;
+    const passwordInput = document.getElementById('passwordLogin').value;
+    const loginMessage = document.getElementById('loginMessage');
+    const { username: correctUsername, password: correctPassword } = loadCredentials();
 
     if (usernameInput === correctUsername && passwordInput === correctPassword) {
-        // 2. Armazena o estado de login na sessionStorage (não persiste após fechar o browser)
-        sessionStorage.setItem(
-        loginMessage.textContent = 
-        loginMessage.style.color = 
+        localStorage.setItem('megaTechIsLoggedIn', 'true');
+        loginMessage.textContent = 'Login bem-sucedido!';
+        loginMessage.style.color = 'green';
         setTimeout(initAdminPageContent, 500);
     } else {
-        loginMessage.textContent = 
-        loginMessage.style.color = 
+        loginMessage.textContent = 'Nome de Utilizador ou Palavra-passe incorretos.';
+        loginMessage.style.color = 'red';
     }
 }
 
 function logoutAdmin() {
-    if (confirm(
-        sessionStorage.removeItem(
-        window.location.reload(); 
+    if (confirm("Tem certeza que deseja terminar a sessão?")) {
+        localStorage.removeItem('megaTechIsLoggedIn');
+        window.location.reload();
     }
 }
 
+// --- Lógica de Alteração de Credenciais (change_credentials.html) ---
 
-// Lógica de Alteração de Credenciais (usadas em change_credentials.html)
-
-async function handleChangePassword(event) {
+function handleChangePassword(event) {
     event.preventDefault();
-    const currentPass = document.getElementById(
-    const newPass = document.getElementById(
-    const confirmNewPass = document.getElementById(
-    const passwordMessage = document.getElementById(
+    const currentPass = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirmNewPass = document.getElementById('confirmNewPassword').value;
+    const passwordMessage = document.getElementById('passwordMessage');
+    const { username, password: actualPassword } = loadCredentials();
     
-    const { username, password: actualPassword } = await fetchCredentials();
-    
-    passwordMessage.style.color = 
-    passwordMessage.textContent = 
+    passwordMessage.style.color = 'red';
+    passwordMessage.textContent = '';
     
     if (currentPass !== actualPassword) {
-        passwordMessage.textContent = 
+        passwordMessage.textContent = 'A Palavra-passe Atual está incorreta.';
     } else if (newPass !== confirmNewPass) {
-        passwordMessage.textContent = 
+        passwordMessage.textContent = 'A Nova Palavra-passe e a Confirmação não coincidem.';
     } else if (newPass.length < 5) {
-        passwordMessage.textContent = 
+        passwordMessage.textContent = 'A Nova Palavra-passe deve ter no mínimo 5 caracteres.';
     } else {
-        const success = await updateCredentials(username, newPass);
-        if (success) {
-            passwordMessage.textContent = 
-            passwordMessage.style.color = 
-            document.getElementById(
-            sessionStorage.removeItem(
-            setTimeout(() => window.location.href = 
-        } else {
-            passwordMessage.textContent = 
-        }
+        saveCredentials(username, newPass);
+        passwordMessage.textContent = 'Palavra-passe alterada com sucesso! Você será redirecionado em breve.';
+        passwordMessage.style.color = 'green';
+        document.getElementById('changePasswordForm').reset();
+        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
     }
 }
 
-async function handleChangeUsername(event) {
+function handleChangeUsername(event) {
     event.preventDefault();
-    const currentUsername = document.getElementById(
-    const newUsername = document.getElementById(
-    const usernameMessage = document.getElementById(
-    
-    const { username: actualUsername, password } = await fetchCredentials();
+    const currentUsername = document.getElementById('currentUsername').value;
+    const newUsername = document.getElementById('newUsername').value;
+    const usernameMessage = document.getElementById('usernameMessage');
+    const { username: actualUsername, password } = loadCredentials();
 
-    usernameMessage.style.color = 
-    usernameMessage.textContent = 
+    usernameMessage.style.color = 'red';
+    usernameMessage.textContent = '';
 
     if (currentUsername !== actualUsername) {
-        usernameMessage.textContent = 
+        usernameMessage.textContent = 'O Nome de Utilizador Atual está incorreto.';
     } else if (newUsername.length < 3) {
-        usernameMessage.textContent = 
+        usernameMessage.textContent = 'O Novo Nome de Utilizador deve ter no mínimo 3 caracteres.';
     } else {
-        const success = await updateCredentials(newUsername, password);
-        if (success) {
-            usernameMessage.textContent = 
-            usernameMessage.style.color = 
-            document.getElementById(
-            sessionStorage.removeItem(
-            setTimeout(() => window.location.href = 
-        } else {
-            usernameMessage.textContent = 
-        }
+        saveCredentials(newUsername, password);
+        usernameMessage.textContent = 'Nome de Utilizador alterado com sucesso! Você será redirecionado em breve.';
+        usernameMessage.style.color = 'green';
+        document.getElementById('changeUsernameForm').reset();
+        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
+    }
+}
+
+/**
+ * Inicializa a lógica da página de alteração de credenciais (change_credentials.html).
+ */
+function initChangeCredentialsPage() {
+    const passwordForm = document.getElementById('changePasswordForm');
+    const usernameForm = document.getElementById('changeUsernameForm');
+
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', handleChangePassword);
+    }
+    if (usernameForm) {
+        usernameForm.addEventListener('submit', handleChangeUsername);
     }
 }
 
 
 // --- Funções de Ajuda ---
-
 function formatCurrency(value) {
-    if (typeof value !== 
-        return "AOA 0";
-    }
-    return new Intl.NumberFormat(
+    if (typeof value !== 'number' || isNaN(value)) return "AOA 0";
+    return new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA', minimumFractionDigits: 0 }).format(value);
 }
 
-// --- Lógica de Persistência (API) ---
+// --- Lógica de Persistência SQL (Supabase) ---
 
-/**
- * Carrega a lista de produtos do servidor.
- * @returns {Array<object>} Lista de produtos.
- */
-async function fetchProducts() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/products`);
-        if (!response.ok) {
-            throw new Error(
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(
+async function loadProducts() {
+    const { data, error } = await _supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Erro ao buscar produtos:', error);
         return [];
     }
+    return data;
 }
-
-// A função saveProducts não é mais necessária, pois as operações são feitas via API.
 
 // --- Lógica do Catálogo (index.html) ---
 
-/**
- * Gera o HTML para um único cartão de produto. (Mantido)
- * @param {object} product - O objeto produto.
- * @returns {string} O HTML do cartão.
- */
 function createProductCard(product) {
     const { id, name, price, description, category, discount, image } = product;
-
     const hasDiscount = discount > 0;
-    const originalPrice = parseFloat(price);
-    const currentPrice = hasDiscount ? originalPrice * (1 - discount / 100) : originalPrice;
+    const originalPrice = price;
+    const currentPrice = hasDiscount ? price * (1 - discount / 100) : price;
 
-    // Extrai as especificações da descrição 
     const specsRegex = /(RAM\/ROM:.*?)(,|$)|(Rede:.*?)(,|$)|(Versão:.*?)(,|$)/gi;
     const specsMatches = description.match(specsRegex) || [];
-    
-    const specsList = specsMatches.map(spec => {
-        return spec.replace(/,$/, 
-    }).filter(s => s.length > 0);
+    const specsList = specsMatches.map(spec => spec.replace(/,$/, '').trim()).filter(s => s.length > 0);
 
     const whatsappMessage = encodeURIComponent(`Olá ${STORE_NAME}, vi o ${name} no vosso site e fiquei interessado. (ID: ${id})`);
     const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
@@ -202,18 +175,18 @@ function createProductCard(product) {
     return `
         <div class="product-card" data-category="${category}" data-id="${id}">
             <div class="product-image-container">
-                ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : 
-                <img src="${image || 
+                ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : ''}
+                <img src="${image || 'placeholder.jpg'}" alt="${name}">
             </div>
             <div class="product-details">
                 <h3>${name}</h3>
                 <p style="white-space: pre-wrap; word-wrap: break-word;">${description}</p> <div class="price-section">
                     <span class="current-price">${formatCurrency(currentPrice)}</span>
-                    ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : 
+                    ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : ''}
                 </div>
                 <div class="specs">
-                    ${specsList.map(spec => `<p><strong>${spec.split(
-                    ${specsList.length === 0 ? 
+                    ${specsList.map(spec => `<p><strong>${spec.split(':')[0]}:</strong> ${spec.split(':')[1]}</p>`).join('')}
+                    ${specsList.length === 0 ? '<p>Ver descrição para especificações detalhadas.</p>' : ''}
                 </div>
                 <a href="${whatsappURL}" class="whatsapp-btn" target="_blank">
                     <i class="fab fa-whatsapp"></i> Tenho Interesse!
@@ -223,33 +196,26 @@ function createProductCard(product) {
     `;
 }
 
-async function renderCatalog(category = 
-    const productGrid = document.getElementById(
+async function renderCatalog(category = 'all', searchTerm = '') {
+    const productGrid = document.getElementById('product-grid');
     if (!productGrid) return;
 
-    const products = await fetchProducts(); // Alterado para fetchProducts
-    productGrid.innerHTML = 
-
+    const products = await loadProducts();
+    productGrid.innerHTML = ''; 
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
-    let filteredProducts = category === 
-        ? products
-        : products.filter(p => p.category === category);
+    // Filtros por Categoria e Pesquisa funcionando em conjunto
+    let filteredProducts = category === 'all' ? products : products.filter(p => p.category === category);
 
     if (normalizedSearchTerm) {
         filteredProducts = filteredProducts.filter(product => {
-            const productText = (
-                product.name +
-                product.description +
-                product.category
-            ).toLowerCase();
-            
+            const productText = (product.name + product.description + product.category).toLowerCase();
             return productText.includes(normalizedSearchTerm);
         });
     }
 
     if (filteredProducts.length === 0) {
-        productGrid.innerHTML = 
+        productGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 50px;">Nenhum produto encontrado.</p>';
         return;
     }
 
@@ -258,116 +224,103 @@ async function renderCatalog(category =
     });
 }
 
-function initIndexPage() {
-    let currentCategory = 
-    renderCatalog(
+async function initIndexPage() {
+    let currentCategory = 'all';
+    await renderCatalog('all');
 
-    const filterButtons = document.querySelectorAll(
+    const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(button => {
-        button.addEventListener(
-            filterButtons.forEach(btn => btn.classList.remove(
-            this.classList.add(
-            
-            currentCategory = this.getAttribute(
-            const searchTerm = document.getElementById(
-            renderCatalog(currentCategory, searchTerm);
+        button.addEventListener('click', async function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.getAttribute('data-category');
+            const searchTerm = document.getElementById('search-input').value; 
+            await renderCatalog(currentCategory, searchTerm);
         });
     });
 
-    const searchInput = document.getElementById(
+    const searchInput = document.getElementById('search-input');
     if (searchInput) {
-        searchInput.addEventListener(
-            renderCatalog(currentCategory, this.value);
+        searchInput.addEventListener('input', async function() {
+            await renderCatalog(currentCategory, this.value);
         });
     }
 }
-
 
 // --- Lógica do Painel de Admin (admin.html) ---
 
 function resetAdminForm() {
-    const form = document.getElementById(
-    const imagePreview = document.getElementById(
-    const submitButton = document.getElementById(
-
+    const form = document.getElementById('productForm');
+    const imagePreview = document.getElementById('imagePreviewAdmin');
+    const submitButton = document.getElementById('submitButton');
     form.reset();
-    document.getElementById(
-    imagePreview.style.display = 
-    imagePreview.src = 
-    submitButton.innerHTML = 
-    submitButton.style.backgroundColor = 
+    document.getElementById('productId').value = '';
+    imagePreview.style.display = 'none';
+    imagePreview.src = '';
+    submitButton.innerHTML = '<i class="fas fa-save"></i> Adicionar Produto';
+    submitButton.style.backgroundColor = 'var(--primary-color)';
 }
 
 async function editProduct(id) {
-    const products = await fetchProducts(); // Alterado para fetchProducts
+    const products = await loadProducts();
     const productToEdit = products.find(p => p.id === id);
     if (!productToEdit) return;
 
-    document.getElementById(
-    document.getElementById(
-    document.getElementById(
-    document.getElementById(
-    document.getElementById(
-    document.getElementById(
+    document.getElementById('productId').value = productToEdit.id;
+    document.getElementById('productName').value = productToEdit.name;
+    document.getElementById('productPrice').value = productToEdit.price;
+    document.getElementById('productDescription').value = productToEdit.description;
+    document.getElementById('productCategory').value = productToEdit.category;
+    document.getElementById('productDiscount').value = productToEdit.discount || 0;
     
-    const isURL = productToEdit.image && productToEdit.image.startsWith(
-    document.getElementById(
-    document.getElementById(
-
-    const imagePreview = document.getElementById(
-    imagePreview.src = productToEdit.image || 
-    imagePreview.style.display = productToEdit.image ? 
-
-    const submitButton = document.getElementById(
-    submitButton.innerHTML = 
-    submitButton.style.backgroundColor = 
+    const isURL = productToEdit.image && productToEdit.image.startsWith('http');
+    document.getElementById('imageURL').value = isURL ? productToEdit.image : '';
+    document.getElementById('imageUpload').value = ''; // Limpa o campo file
     
-    window.scrollTo({ top: 0, behavior: 
+    const imagePreview = document.getElementById('imagePreviewAdmin');
+    imagePreview.src = productToEdit.image || '';
+    imagePreview.style.display = productToEdit.image ? 'block' : 'none';
+
+    const submitButton = document.getElementById('submitButton');
+    submitButton.innerHTML = '<i class="fas fa-edit"></i> Salvar Edição';
+    submitButton.style.backgroundColor = '#ffc107'; 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function deleteProduct(id) {
-    if (confirm(
-        try {
-            const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-                method: 
-            });
-
-            if (!response.ok) {
-                throw new Error(
-            }
-
-            await renderAdminList(); 
-            alert(
-        } catch (error) {
-            console.error(
-            alert(
+    if (confirm("Tem certeza que deseja remover este produto?")) {
+        const { error } = await _supabase.from('products').delete().eq('id', id);
+        if (error) {
+            alert("Erro ao remover: " + error.message);
+        } else {
+            alert("Produto removido!");
+            await renderAdminList();
         }
     }
 }
 
-
 async function renderAdminList() {
-    const productListAdmin = document.getElementById(
+    const productListAdmin = document.getElementById('productListAdmin');
     if (!productListAdmin) return;
 
-    const products = await fetchProducts(); // Alterado para fetchProducts
-    productListAdmin.innerHTML = 
+    const products = await loadProducts();
+    productListAdmin.innerHTML = ''; 
 
     if (products.length === 0) {
-        productListAdmin.innerHTML = 
+        productListAdmin.innerHTML = '<li>Nenhum produto publicado.</li>';
         return;
     }
 
     products.forEach(product => {
-        const listItem = document.createElement(
+        const listItem = document.createElement('li');
         listItem.innerHTML = `
             <div class="product-info-admin">
-                <strong>${product.name}</strong> (${product.category}) - ${formatCurrency(parseFloat(product.price))}
-                ${product.discount > 0 ? `<span style="color: red; margin-left: 10px;">(${product.discount}% OFF)</span>` : 
+                <strong>${product.name}</strong> (${product.category}) - ${formatCurrency(product.price)}
+                ${product.discount > 0 ? `<span style="color: red; margin-left: 10px;">(${product.discount}% OFF)</span>` : ''}
             </div>
             <div class="product-actions-admin">
-                <button onclick="editProduct(
-                <button onclick="deleteProduct(
+                <button onclick="editProduct('${product.id}')"><i class="fas fa-pen"></i> Editar</button>
+                <button onclick="deleteProduct('${product.id}')" style="background-color: #dc3545;"><i class="fas fa-trash"></i> Remover</button>
             </div>
         `;
         productListAdmin.appendChild(listItem);
@@ -376,167 +329,93 @@ async function renderAdminList() {
 
 async function handleProductSubmit(event) {
     event.preventDefault();
-
-    const id = document.getElementById(
-    const name = document.getElementById(
-    const price = parseFloat(document.getElementById(
-    const description = document.getElementById(
-    const category = document.getElementById(
-    const discount = parseInt(document.getElementById(
-    const imageURL = document.getElementById(
-    const imageFile = document.getElementById(
+    const id = document.getElementById('productId').value;
+    const name = document.getElementById('productName').value;
+    const price = parseFloat(document.getElementById('productPrice').value);
+    const description = document.getElementById('productDescription').value;
+    const category = document.getElementById('productCategory').value;
+    const discount = parseInt(document.getElementById('productDiscount').value) || 0;
+    const imageURL = document.getElementById('imageURL').value;
+    const imageFile = document.getElementById('imageUpload').files[0];
     
     let imageUrlToUse = imageURL;
 
     if (imageFile) {
-        // Leitura do arquivo para Base64 (mantido, pois o backend aceita)
         imageUrlToUse = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
             reader.readAsDataURL(imageFile);
         });
     } else if (!imageUrlToUse && id) {
-        // Se for edição e não alterou a imagem, mantém a existente
-        const products = await fetchProducts();
+        const products = await loadProducts();
         const existingProduct = products.find(p => p.id === id);
-        imageUrlToUse = existingProduct ? existingProduct.image : 
-    } else if (!imageUrlToUse) {
-        alert(
-        return;
+        imageUrlToUse = existingProduct ? existingProduct.image : '';
     }
 
-    const productData = {
-        id: id || Date.now().toString(),
-        name,
-        price,
-        description,
-        category,
-        discount,
-        image: imageUrlToUse,
-    };
+    const productData = { name, price, description, category, discount, image: imageUrlToUse };
+    if (id) productData.id = id;
 
-    try {
-        const method = id ? 
-        const url = id ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
+    const { error } = await _supabase.from('products').upsert([productData]);
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                
-            },
-            body: JSON.stringify(productData)
-        });
-
-        if (!response.ok) {
-            throw new Error(
-        }
-
-        const message = id ? "Produto atualizado com sucesso!" : "Novo produto adicionado com sucesso!";
-        alert(message);
-
+    if (error) {
+        alert("Erro: " + error.message);
+    } else {
+        alert("Sucesso!");
         resetAdminForm();
         await renderAdminList();
-    } catch (error) {
-        console.error(
-        alert(
     }
 }
 
 function previewImage(event) {
-    const imagePreview = document.getElementById(
-    imagePreview.style.display = 
-    
-    if (event.target.id === 
-        const file = event.target.files[0];
+    const imagePreview = document.getElementById('imagePreviewAdmin');
+    imagePreview.style.display = 'block';
+    if (event.target.id === 'imageUpload' && event.target.files.length > 0) {
         const reader = new FileReader();
-        reader.onload = function(e) {
-            imagePreview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-        document.getElementById(
-    } 
-    else if (event.target.id === 
+        reader.onload = (e) => imagePreview.src = e.target.result;
+        reader.readAsDataURL(event.target.files[0]);
+        document.getElementById('imageURL').value = ''; // Limpa URL se arquivo for carregado
+    } else if (event.target.id === 'imageURL' && event.target.value) {
         imagePreview.src = event.target.value;
-        document.getElementById(
-        
-        imagePreview.onerror = function() {
-            imagePreview.src = 
-            imagePreview.style.display = 
-            alert(
-        };
-    } else {
-         imagePreview.style.display = 
+        document.getElementById('imageUpload').value = ''; // Limpa arquivo se URL for inserido
     }
 }
 
-/**
- * Inicializa o conteúdo do painel (visível após o login).
- */
 function initAdminPageContent() {
-    // 1. Verifica o estado de login na sessionStorage
-    const isLoggedIn = sessionStorage.getItem(
-    const loginSection = document.getElementById(
-    const adminContent = document.getElementById(
+    const isLoggedIn = localStorage.getItem('megaTechIsLoggedIn') === 'true';
+    const loginSection = document.getElementById('login-section');
+    const adminContent = document.getElementById('admin-content');
 
     if (isLoggedIn) {
-        loginSection.style.display = 
-        adminContent.style.display = 
-        
-        const form = document.getElementById(
-        if (form) {
-            form.addEventListener(
-            document.getElementById(
-            document.getElementById(
-        }
+        loginSection.style.display = 'none';
+        adminContent.style.display = 'flex';
         renderAdminList();
     } else {
-        loginSection.style.display = 
-        adminContent.style.display = 
+        loginSection.style.display = 'block';
+        adminContent.style.display = 'none';
     }
 }
 
-/**
- * Inicializa a lógica da página de admin (admin.html).
- */
 function initAdminPage() {
-    // Apenas liga o formulário de login no admin.html
-    const loginForm = document.getElementById(
-    if (loginForm) {
-        loginForm.addEventListener(
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+    const prodForm = document.getElementById('productForm');
+    if (prodForm) {
+        prodForm.addEventListener('submit', handleProductSubmit);
+        document.getElementById('imageUpload').addEventListener('change', previewImage);
+        document.getElementById('imageURL').addEventListener('input', previewImage);
     }
-    
-    // Verifica o estado do login
     initAdminPageContent();
 }
 
-/**
- * Inicializa a lógica da página de alteração de credenciais (change_credentials.html).
- */
-function initChangeCredentialsPage() {
-    const passwordForm = document.getElementById(
-    const usernameForm = document.getElementById(
-
-    if (passwordForm) {
-        passwordForm.addEventListener(
-    }
-    if (usernameForm) {
-        usernameForm.addEventListener(
-    }
-}
-
-
 // --- Inicialização Principal ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadCredentials(); 
+    const pathname = window.location.pathname.split('/').pop();
 
-document.addEventListener(
-    // Não é mais necessário chamar loadCredentials aqui, pois é chamado dentro das funções
-    
-    const pathname = window.location.pathname;
-
-    if (document.getElementById(
+    if (document.getElementById('product-grid')) {
         initIndexPage();
-    } else if (pathname.includes(
+    } else if (pathname === 'change_credentials.html') {
         initChangeCredentialsPage();
-    } else if (document.getElementById(
+    } else if (document.getElementById('productListAdmin')) {
         initAdminPage();
     }
 });

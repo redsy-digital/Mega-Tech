@@ -13,10 +13,22 @@
 }
 
 * {
-    border: 0px;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
+}
+.menu {
+    align-items: right;
+}
+div#menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  min-width: 150px;
 }
 
 body {
@@ -36,61 +48,45 @@ a {
     width: 90%;
     max-width: 1200px;
     margin: 0 auto;
-    padding:  0;
+    padding: 20px 0;
 }
 
 /* --- Header / Hero Section (index.html) --- */
 header {
-    padding-top: 0px;
-    border: 0px;
+    margin:0px;
     background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
     color: var(--text-light);
-    padding: 20px 0; /* Menos padding vertical */
+    padding: 0px 0;
     text-align: center;
     border-radius: 0 0 20px 20px;
     box-shadow: var(--card-shadow);
 }
 
-.logo-section {
-    margin-top: 0px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Alinhamento à esquerda */
-    text-align: left;
-    margin-bottom: 20px; /* Espaço abaixo do logo/nome */
-}
-/*####################*/
-section#logo {
+img#logo {
+    width:60px;
+    border-radius:10px;
     margin:0px;
-    text-align: inline-block;
-    padding-top:10px;
-    height:80px;
+    margin-bottom:20px;
+    
 }
-section#h1 > h1{
-    font-size:32px;
-    margin:0px;
-    padding:0px;
+div#h1 > h1 {
+    line-height: 0.5;
+    letter-spacing: -1px;
+    text-indent: 2px;
 }
-section#h1 > p {
+div#h1 > p {
     font-size:9px;
     margin:0px;
     padding:0px;
+    border: 0px;
+    text-indent: 10px;
 }
-section#h1 {
-    text-align: inline-block;
-    gap: 0px;
-    height:80px;
-}
-
-/*###################*/
-
-.logo-section img {
-    width: 60px; /* Logótipo menor */
-    height:55px;
-    margin-top: 0px;
-    margin-right: 15px;
-    margin-bottom: 0;
-    border-radius: 5px; /* Para um toque profissional */
+div#h1 {
+    display:inline-block;
+    margin:0px;
+    font-size: 12px;
+    padding:0px;
+    border: 0px;
 }
 div#ap {
     display:flex;
@@ -99,46 +95,44 @@ div#ap {
     margin:0px;
 }
 
-div#h1 > h1{
-    display:inline-block;
-    margin:0px;
-}
-div#h1 >p {
-    text-indent:10px ;
+.logo-section {
+    display:flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.logo-text h1 {
-    font-size: 1.8em;
-    font-weight: 700;
-    margin: 0;
-    line-height: 1;
-}
-
-.logo-text p.tagline {
-    font-style: italic;
-    margin: 0;
-    font-size: 0.9em;
-    opacity: 0.8;
-}
-
-.header-info-content {
-    text-align: center; /* Centraliza o slogan */
-}
-
-.header-info-content p {
-    font-size: 1.1em;
-    max-width: 800px;
-    margin: 0 auto;
+.logo-section img {
+    width: 120px;
     margin-bottom: 10px;
 }
 
+.logo-section h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.logo-section p.tagline {
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.menu {
+    background: none;
+    border: none;
+    width:50px;
+    font-size: 30px;
+    font-weight: bold;
+    color:white;
+    box-shadow: 2px 2px 2px #0000005C;
+    border-radius:10px;
+}
 /* --- Painel de Administrador (admin.html) --- */
 .admin-header {
     background-color: var(--primary-color);
     color: white;
     padding: 20px 0;
     text-align: center;
-    margin:0p;
 }
 
 .admin-header h1 {
@@ -300,7 +294,7 @@ form button:hover {
     position: relative;
     height: 250px;
     overflow: hidden;
-    background-color: #eee;
+    background-color: #eee;#42445A
     display: flex;
     justify-content: center;
     align-items: center;
@@ -464,22 +458,10 @@ footer a {
 }
 
 @media (max-width: 600px) {
-    .admin-header {
-        text-align:center;
+    .logo-section h1 {
+        font-size: 2em;
     }
-    .logo-section {
-        justify-content: center; /* Centraliza logo e nome em mobile */
-        text-align: center;
-        flex-direction: column;
-        align-items: center;
-    }
-    .logo-text {
-        margin-top: 10px;
-    }
-    .logo-text h1 {
-        font-size: 1.5em;
-    }
-    
+
     .container {
         width: 95%;
     }
