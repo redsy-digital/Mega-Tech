@@ -18,40 +18,41 @@ function chama() {
 const WHATSAPP_NUMBER = "244924811382";
 const STORE_NAME = "Mega Tech";
 
-// --- Credenciais e Autenticação (Mantido em LocalStorage) ---
+// --- Credenciais e Autenticação (Mantido em LocalStorage por agora) ---
 const DEFAULT_USERNAME = "adminmegatech";
 const DEFAULT_PASSWORD = "123";
 
-/**
- * Carrega as credenciais atuais do localStorage ou usa as padrão.
- */
 function loadCredentials() {
     const storedUsername = localStorage.getItem('megaTechAdminUsername');
     const storedPassword = localStorage.getItem('megaTechAdminPassword');
+    
+    // Se não houver credenciais armazenadas, inicializa com as credenciais padrão
     if (!storedUsername || !storedPassword) {
         saveCredentials(DEFAULT_USERNAME, DEFAULT_PASSWORD);
         return { username: DEFAULT_USERNAME, password: DEFAULT_PASSWORD };
     }
+    
+    // Retorna as credenciais armazenadas
     return { username: storedUsername, password: storedPassword };
 }
 
-/**
- * Salva as novas credenciais no localStorage.
- */
 function saveCredentials(username, password) {
     localStorage.setItem('megaTechAdminUsername', username);
     localStorage.setItem('megaTechAdminPassword', password);
 }
 
-// Lógica de Login/Logout
 function handleLogin(event) {
     event.preventDefault();
     const usernameInput = document.getElementById('usernameLogin').value;
     const passwordInput = document.getElementById('passwordLogin').value;
     const loginMessage = document.getElementById('loginMessage');
+    // Remove espaços em branco acidentais que podem ter sido adicionados
+    const trimmedUsernameInput = usernameInput.trim();
+    const trimmedPasswordInput = passwordInput.trim();
+    
     const { username: correctUsername, password: correctPassword } = loadCredentials();
 
-    if (usernameInput === correctUsername && passwordInput === correctPassword) {
+    if (trimmedUsernameInput === correctUsername && trimmedPasswordInput === correctPassword) {
         localStorage.setItem('megaTechIsLoggedIn', 'true');
         loginMessage.textContent = 'Login bem-sucedido!';
         loginMessage.style.color = 'green';
@@ -68,73 +69,6 @@ function logoutAdmin() {
         window.location.reload();
     }
 }
-
-// --- Lógica de Alteração de Credenciais (change_credentials.html) ---
-
-function handleChangePassword(event) {
-    event.preventDefault();
-    const currentPass = document.getElementById('currentPassword').value;
-    const newPass = document.getElementById('newPassword').value;
-    const confirmNewPass = document.getElementById('confirmNewPassword').value;
-    const passwordMessage = document.getElementById('passwordMessage');
-    const { username, password: actualPassword } = loadCredentials();
-    
-    passwordMessage.style.color = 'red';
-    passwordMessage.textContent = '';
-    
-    if (currentPass !== actualPassword) {
-        passwordMessage.textContent = 'A Palavra-passe Atual está incorreta.';
-    } else if (newPass !== confirmNewPass) {
-        passwordMessage.textContent = 'A Nova Palavra-passe e a Confirmação não coincidem.';
-    } else if (newPass.length < 5) {
-        passwordMessage.textContent = 'A Nova Palavra-passe deve ter no mínimo 5 caracteres.';
-    } else {
-        saveCredentials(username, newPass);
-        passwordMessage.textContent = 'Palavra-passe alterada com sucesso! Você será redirecionado em breve.';
-        passwordMessage.style.color = 'green';
-        document.getElementById('changePasswordForm').reset();
-        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
-    }
-}
-
-function handleChangeUsername(event) {
-    event.preventDefault();
-    const currentUsername = document.getElementById('currentUsername').value;
-    const newUsername = document.getElementById('newUsername').value;
-    const usernameMessage = document.getElementById('usernameMessage');
-    const { username: actualUsername, password } = loadCredentials();
-
-    usernameMessage.style.color = 'red';
-    usernameMessage.textContent = '';
-
-    if (currentUsername !== actualUsername) {
-        usernameMessage.textContent = 'O Nome de Utilizador Atual está incorreto.';
-    } else if (newUsername.length < 3) {
-        usernameMessage.textContent = 'O Novo Nome de Utilizador deve ter no mínimo 3 caracteres.';
-    } else {
-        saveCredentials(newUsername, password);
-        usernameMessage.textContent = 'Nome de Utilizador alterado com sucesso! Você será redirecionado em breve.';
-        usernameMessage.style.color = 'green';
-        document.getElementById('changeUsernameForm').reset();
-        setTimeout(() => window.location.href = 'admin.html', 2000); // Redireciona para o login
-    }
-}
-
-/**
- * Inicializa a lógica da página de alteração de credenciais (change_credentials.html).
- */
-function initChangeCredentialsPage() {
-    const passwordForm = document.getElementById('changePasswordForm');
-    const usernameForm = document.getElementById('changeUsernameForm');
-
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', handleChangePassword);
-    }
-    if (usernameForm) {
-        usernameForm.addEventListener('submit', handleChangeUsername);
-    }
-}
-
 
 // --- Funções de Ajuda ---
 function formatCurrency(value) {
@@ -180,7 +114,8 @@ function createProductCard(product) {
             </div>
             <div class="product-details">
                 <h3>${name}</h3>
-                <p style="white-space: pre-wrap; word-wrap: break-word;">${description}</p> <div class="price-section">
+                <p>${description.substring(0, 100)}...</p>
+                <div class="price-section">
                     <span class="current-price">${formatCurrency(currentPrice)}</span>
                     ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : ''}
                 </div>
@@ -204,8 +139,13 @@ async function renderCatalog(category = 'all', searchTerm = '') {
     productGrid.innerHTML = ''; 
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
-    // Filtros por Categoria e Pesquisa funcionando em conjunto
-    let filteredProducts = category === 'all' ? products : products.filter(p => p.category === category);
+        let filteredProducts = products;
+
+    if (category !== 'all') {
+        // O valor do botão de filtro (category) agora corresponde ao valor da categoria no DB (p.category).
+        // A comparação é feita diretamente.
+        filteredProducts = products.filter(p => p.category === category);
+    }
 
     if (normalizedSearchTerm) {
         filteredProducts = filteredProducts.filter(product => {
@@ -256,7 +196,6 @@ function resetAdminForm() {
     form.reset();
     document.getElementById('productId').value = '';
     imagePreview.style.display = 'none';
-    imagePreview.src = '';
     submitButton.innerHTML = '<i class="fas fa-save"></i> Adicionar Produto';
     submitButton.style.backgroundColor = 'var(--primary-color)';
 }
@@ -275,8 +214,6 @@ async function editProduct(id) {
     
     const isURL = productToEdit.image && productToEdit.image.startsWith('http');
     document.getElementById('imageURL').value = isURL ? productToEdit.image : '';
-    document.getElementById('imageUpload').value = ''; // Limpa o campo file
-    
     const imagePreview = document.getElementById('imagePreviewAdmin');
     imagePreview.src = productToEdit.image || '';
     imagePreview.style.display = productToEdit.image ? 'block' : 'none';
@@ -316,7 +253,6 @@ async function renderAdminList() {
         listItem.innerHTML = `
             <div class="product-info-admin">
                 <strong>${product.name}</strong> (${product.category}) - ${formatCurrency(product.price)}
-                ${product.discount > 0 ? `<span style="color: red; margin-left: 10px;">(${product.discount}% OFF)</span>` : ''}
             </div>
             <div class="product-actions-admin">
                 <button onclick="editProduct('${product.id}')"><i class="fas fa-pen"></i> Editar</button>
@@ -373,10 +309,8 @@ function previewImage(event) {
         const reader = new FileReader();
         reader.onload = (e) => imagePreview.src = e.target.result;
         reader.readAsDataURL(event.target.files[0]);
-        document.getElementById('imageURL').value = ''; // Limpa URL se arquivo for carregado
     } else if (event.target.id === 'imageURL' && event.target.value) {
         imagePreview.src = event.target.value;
-        document.getElementById('imageUpload').value = ''; // Limpa arquivo se URL for inserido
     }
 }
 
@@ -395,6 +329,46 @@ function initAdminPageContent() {
     }
 }
 
+function handleChangeCredentials(event) {
+    event.preventDefault();
+    const currentPasswordInput = document.getElementById('currentPassword').value;
+    const newUsernameInput = document.getElementById('newUsername').value;
+    const newPasswordInput = document.getElementById('newPassword').value;
+    const confirmNewPasswordInput = document.getElementById('confirmNewPassword').value;
+    const changeMessage = document.getElementById('changeMessage');
+
+    const { username: correctUsername, password: correctPassword } = loadCredentials();
+
+    if (currentPasswordInput !== correctPassword) {
+        changeMessage.textContent = 'Palavra-passe atual incorreta.';
+        changeMessage.style.color = 'red';
+        return;
+    }
+
+    if (newPasswordInput !== confirmNewPasswordInput) {
+        changeMessage.textContent = 'A nova palavra-passe e a confirmação não coincidem.';
+        changeMessage.style.color = 'red';
+        return;
+    }
+
+    if (newUsernameInput.trim() === '' || newPasswordInput.trim() === '') {
+        changeMessage.textContent = 'Nome de utilizador e palavra-passe não podem estar vazios.';
+        changeMessage.style.color = 'red';
+        return;
+    }
+
+    saveCredentials(newUsernameInput, newPasswordInput);
+    changeMessage.textContent = 'Credenciais alteradas com sucesso! Redirecionando...';
+    changeMessage.style.color = 'green';
+    
+    // Força o logout para que o utilizador tenha que fazer login com as novas credenciais
+    localStorage.removeItem('megaTechIsLoggedIn');
+    
+    setTimeout(() => {
+        window.location.href = 'admin.html';
+    }, 1500);
+}
+
 function initAdminPage() {
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
     const prodForm = document.getElementById('productForm');
@@ -406,16 +380,19 @@ function initAdminPage() {
     initAdminPageContent();
 }
 
-// --- Inicialização Principal ---
 document.addEventListener('DOMContentLoaded', () => {
     loadCredentials(); 
-    const pathname = window.location.pathname.split('/').pop();
-
     if (document.getElementById('product-grid')) {
         initIndexPage();
-    } else if (pathname === 'change_credentials.html') {
-        initChangeCredentialsPage();
     } else if (document.getElementById('productListAdmin')) {
         initAdminPage();
+    } else if (document.getElementById('changeCredentialsForm')) {
+        // Verifica se o utilizador está logado antes de permitir a alteração de credenciais
+        const isLoggedIn = localStorage.getItem('megaTechIsLoggedIn') === 'true';
+        if (!isLoggedIn) {
+            window.location.href = 'admin.html'; // Redireciona para login se não estiver logado
+            return;
+        }
+        document.getElementById('changeCredentialsForm').addEventListener('submit', handleChangeCredentials);
     }
 });
