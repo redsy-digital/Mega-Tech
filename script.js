@@ -91,6 +91,38 @@ async function loadProducts() {
     return data;
 }
 
+async function loadCategories() {
+    const { data, error } = await _supabase
+        .from('products')
+        .select('category');
+
+    if (error) {
+        console.error('Erro ao buscar categorias:', error);
+        return [];
+    }
+    
+    // Extrair categorias únicas e remover duplicados
+    const categories = [...new Set(data.map(item => item.category))].sort();
+    return categories;
+}
+
+function renderFilterButtons(categories, currentCategory) {
+    const filtersSection = document.querySelector('.filters');
+    if (!filtersSection) return;
+
+    let buttonsHTML = '<h2>Nossos Produtos</h2>';
+    
+    // Botão "Todos"
+    buttonsHTML += `<button class="filter-btn ${currentCategory === 'all' ? 'active' : ''}" data-category="all">Todos</button>`;
+
+    // Botões de categorias dinâmicas
+    categories.forEach(category => {
+        buttonsHTML += `<button class="filter-btn ${currentCategory === category ? 'active' : ''}" data-category="${category}">${category}</button>`;
+    });
+
+    filtersSection.innerHTML = buttonsHTML;
+}
+
 // --- Lógica do Catálogo (index.html) ---
 
 function createProductCard(product) {
@@ -107,14 +139,14 @@ function createProductCard(product) {
     const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
 
     return `
-        <div class="product-card" data-category="${category}" data-id="${id}">
+        <div class="product-card" data-category="${category}" data-id="${id}" onclick="window.location.href='product.html?id=${id}'" style="cursor: pointer;">
             <div class="product-image-container">
                 ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : ''}
                 <img src="${image || 'placeholder.jpg'}" alt="${name}">
             </div>
             <div class="product-details">
                 <h3>${name}</h3>
-                <p>${description.substring(0, 100)}...</p>
+                <p>${description}</p>
                 <div class="price-section">
                     <span class="current-price">${formatCurrency(currentPrice)}</span>
                     ${hasDiscount ? `<span class="original-price">${formatCurrency(originalPrice)}</span>` : ''}
@@ -123,7 +155,7 @@ function createProductCard(product) {
                     ${specsList.map(spec => `<p><strong>${spec.split(':')[0]}:</strong> ${spec.split(':')[1]}</p>`).join('')}
                     ${specsList.length === 0 ? '<p>Ver descrição para especificações detalhadas.</p>' : ''}
                 </div>
-                <a href="${whatsappURL}" class="whatsapp-btn" target="_blank">
+                <a href="${whatsappURL}" class="whatsapp-btn" target="_blank" onclick="event.stopPropagation();">
                     <i class="fab fa-whatsapp"></i> Tenho Interesse!
                 </a>
             </div>
@@ -166,15 +198,26 @@ async function renderCatalog(category = 'all', searchTerm = '') {
 
 async function initIndexPage() {
     let currentCategory = 'all';
+    
+    // 1. Carregar e renderizar botões de filtro
+    const categories = await loadCategories();
+    renderFilterButtons(categories, currentCategory);
+    
+    // 2. Renderizar catálogo inicial
     await renderCatalog('all');
 
+    // 3. Adicionar event listeners aos botões de filtro (agora dinâmicos)
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(button => {
         button.addEventListener('click', async function() {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Atualizar estado ativo dos botões
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
+            
             currentCategory = this.getAttribute('data-category');
-            const searchTerm = document.getElementById('search-input').value; 
+            const searchInput = document.getElementById('search-input');
+            const searchTerm = searchInput ? searchInput.value : ''; 
+            
             await renderCatalog(currentCategory, searchTerm);
         });
     });
@@ -337,7 +380,7 @@ function handleChangeCredentials(event) {
     const confirmNewPasswordInput = document.getElementById('confirmNewPassword').value;
     const changeMessage = document.getElementById('changeMessage');
 
-    const { username: correctUsername, password: correctPassword } = loadCredentials();
+    const { username: currentUsername, password: correctPassword } = loadCredentials();
 
     if (currentPasswordInput !== correctPassword) {
         changeMessage.textContent = 'Palavra-passe atual incorreta.';
@@ -345,19 +388,22 @@ function handleChangeCredentials(event) {
         return;
     }
 
-    if (newPasswordInput !== confirmNewPasswordInput) {
+    if (newPasswordInput && newPasswordInput !== confirmNewPasswordInput) {
         changeMessage.textContent = 'A nova palavra-passe e a confirmação não coincidem.';
         changeMessage.style.color = 'red';
         return;
     }
+    
+    const finalUsername = newUsernameInput.trim() || currentUsername;
+    const finalPassword = newPasswordInput.trim() || correctPassword;
 
-    if (newUsernameInput.trim() === '' || newPasswordInput.trim() === '') {
-        changeMessage.textContent = 'Nome de utilizador e palavra-passe não podem estar vazios.';
+    if (finalUsername === '' || finalPassword === '') {
+        changeMessage.textContent = 'Nome de utilizador e palavra-passe não podem ficar vazios.';
         changeMessage.style.color = 'red';
         return;
     }
 
-    saveCredentials(newUsernameInput, newPasswordInput);
+    saveCredentials(finalUsername, finalPassword);
     changeMessage.textContent = 'Credenciais alteradas com sucesso! Redirecionando...';
     changeMessage.style.color = 'green';
     
@@ -394,5 +440,81 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         document.getElementById('changeCredentialsForm').addEventListener('submit', handleChangeCredentials);
+    } else if (document.getElementById('product-details-section')) {
+        initProductPage();
     }
 });
+
+async function loadProductDetails(id) {
+    const { data, error } = await _supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) {
+        console.error('Erro ao buscar detalhes do produto:', error);
+        return null;
+    }
+    return data;
+}
+
+function renderProductDetails(product) {
+    const productContent = document.getElementById('product-content');
+    if (!product) {
+        productContent.innerHTML = '<h2 style="text-align: center; padding: 50px;">Produto não encontrado.</h2>';
+        return;
+    }
+
+    const { id, name, price, description, category, discount, image } = product;
+    const hasDiscount = discount > 0;
+    const originalPrice = price;
+    const currentPrice = hasDiscount ? price * (1 - discount / 100) : price;
+
+    // Atualiza o título da página
+    document.getElementById('product-title').textContent = name + ' - Mega Tech';
+
+    const whatsappMessage = encodeURIComponent(`Olá ${STORE_NAME}, vi o ${name} no vosso site e estou interessado. (ID: ${id})`);
+    const whatsappURL = `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`;
+
+    productContent.innerHTML = `
+        <div class="product-detail-container">
+            <div class="product-detail-image">
+                ${hasDiscount ? `<span class="promo-badge">${discount}% OFF</span>` : ''}
+                <img src="${image || 'placeholder.jpg'}" alt="${name}">
+            </div>
+            <div class="product-detail-info">
+                <h2>${name}</h2>
+                <p class="product-category">Categoria: <strong>${category}</strong></p>
+                
+                <div class="price-section">
+                    <span class="current-price-detail">${formatCurrency(currentPrice)}</span>
+                    ${hasDiscount ? `<span class="original-price-detail">${formatCurrency(originalPrice)}</span>` : ''}
+                </div>
+
+                <h3>Descrição Completa</h3>
+                <p>${description.replace(/\n/g, '<br>')}</p>
+
+                <a href="${whatsappURL}" class="whatsapp-btn-detail" target="_blank">
+                    <i class="fab fa-whatsapp"></i> Tenho Interesse!
+                </a>
+                
+                <a href="index.html" class="back-to-shop-btn">
+                    <i class="fas fa-arrow-left"></i> Voltar à Loja
+                </a>
+            </div>
+        </div>
+    `;
+}
+
+async function initProductPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (productId) {
+        const product = await loadProductDetails(productId);
+        renderProductDetails(product);
+    } else {
+        document.getElementById('product-content').innerHTML = '<h2 style="text-align: center; padding: 50px;">ID do produto não especificado.</h2>';
+    }
+}

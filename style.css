@@ -270,8 +270,8 @@ form button:hover {
 /* --- Catálogo de Produtos (index.html) --- */
 #product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
     padding: 20px 0;
 }
 
@@ -292,9 +292,9 @@ form button:hover {
 
 .product-image-container {
     position: relative;
-    height: 250px;
+    height: 200px;
     overflow: hidden;
-    background-color: #eee;#42445A
+    background-color: #eee;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -331,10 +331,10 @@ form button:hover {
 }
 
 .product-details h3 {
-    font-size: 1.5em;
+    font-size: 1.2em;
     margin-bottom: 10px;
     color: var(--secondary-color);
-    min-height: 40px; /* Garante altura mínima para nomes curtos */
+    min-height: 40px;
 }
 
 .price-section {
@@ -342,8 +342,8 @@ form button:hover {
 }
 
 .current-price {
-    font-size: 1.8em;
-    color: #28a745; /* Verde para o preço atual */
+    font-size: 1.4em;
+    color: #28a745;
     font-weight: 700;
     margin-right: 10px;
 }
@@ -457,7 +457,7 @@ footer a {
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .logo-section h1 {
         font-size: 2em;
     }
@@ -468,6 +468,7 @@ footer a {
 
     #product-grid {
         grid-template-columns: 1fr;
+        gap: 15px;
     }
 
     .floating-whatsapp {
@@ -477,5 +478,94 @@ footer a {
         line-height: 50px;
         bottom: 15px;
         right: 15px;
+    }
+}
+/* --- Estilos para a Página de Detalhes do Produto (product.html) --- */
+
+.product-detail-container {
+    display: flex;
+    gap: 40px;
+    padding: 30px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.product-detail-image {
+    flex: 1;
+    position: relative;
+    max-width: 50%;
+}
+
+.product-detail-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-detail-info {
+    flex: 1;
+}
+
+.product-detail-info h2 {
+    font-size: 2.5em;
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+.product-category {
+    font-size: 1.1em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.current-price-detail {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #28a745; /* Verde para o preço */
+    display: block;
+    margin-bottom: 5px;
+}
+
+.original-price-detail {
+    font-size: 1.4em;
+    color: #dc3545; /* Vermelho para o preço original riscado */
+    text-decoration: line-through;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.whatsapp-btn-detail {
+    display: inline-block;
+    background-color: #25d366;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+}
+
+.whatsapp-btn-detail:hover {
+    background-color: #128c7e;
+}
+
+.back-to-shop-btn {
+    display: block;
+    margin-top: 20px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Responsividade para a página de detalhes */
+@media (max-width: 768px) {
+    .product-detail-container {
+        flex-direction: column;
+    }
+
+    .product-detail-image {
+        max-width: 100%;
     }
 }
